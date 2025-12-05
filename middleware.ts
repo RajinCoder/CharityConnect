@@ -22,7 +22,6 @@ export async function middleware(req: any) {
 }
 
 export const config = {
-  matcher: ["/Dashboard/:path*", 
-"/Account/Profile"
+  matcher: ["/Account/Profile"
   ], //
 };
