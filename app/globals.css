@@ -7,3 +7,42 @@
 .btn {
     @apply bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600;
 }
+.profile {
+    @apply max-w-md mx-auto bg-white p-6 rounded-lg shadow-md;
+}
+
+.profile-photo {
+    @apply w-32 h-32 rounded-full bg-amber-800 mx-auto;
+}
+
+.follow {
+    @apply flex items-center justify-center gap-x-4 rounded-md text-white;
+}
+
+.follow-list {
+    @apply hover:underline text-black;
+}
+
+.profile-details {
+    @apply  mt-4 p-4
+}
+
+.profile-btns {
+    @apply flex justify-between mt-4;
+}
+
+.profile-edit-btn {
+    @apply bg-yellow-500 hover:bg-yellow-600;
+}
+
+.profile-save-btn {
+    @apply bg-green-500 hover:bg-green-600;
+}
+
+.pledged-posts {
+    @apply mt-6 p-4 flex gap-x-8 rounded-md mx-auto w-[70%] h-[25vh] shadow-md;
+}
+
+.posts {
+    @apply border border-black p-2 rounded-md w-fit h-full;
+}
