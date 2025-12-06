@@ -25,7 +25,7 @@ export default function RegisterModal() {
       router.push("/Account/Profile");
       router.refresh();
     } else {
-      // Handle errors
+      alert((await response.json()).error);
     }
   }
   return (
