@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBox,
@@ -11,6 +12,9 @@ import {
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import { redirect } from "next/navigation";
+
+
 
 interface Commitment {
   userName: string;
@@ -28,12 +32,14 @@ interface CommitmentItem {
 }
 
 interface PostProps {
+  postId: string;
   imageUrl: string;
   caption: string;
   accountName: string;
   commitmentItems: CommitmentItem[];
   commitments: Commitment[];
   date?: string;
+  userName?: string;
 }
 
 const iconMap: Record<string, IconDefinition> = {
@@ -42,33 +48,113 @@ const iconMap: Record<string, IconDefinition> = {
   clothing: faTshirt,
 };
 
+
 export default function Post({
+  postId,
   imageUrl,
   caption,
   accountName,
   commitmentItems,
   commitments,
   date,
+  userName,
 }: PostProps) {
   const [showCommitments, setShowCommitments] = useState(false);
   const [makeCommitment, setMakeCommitment] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Record<string, number>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [localCommitmentItems, setLocalCommitmentItems] = useState(commitmentItems);
+  const [localCommitments, setLocalCommitments] = useState(commitments);
+  const router = useRouter();
 
-  const totalNeeded = commitmentItems.reduce(
+
+
+  const totalNeeded = localCommitmentItems.reduce(
     (sum, item) => sum + item.needed,
     0
   );
-  const totalCommitted = commitmentItems.reduce(
+  const totalCommitted = localCommitmentItems.reduce(
     (sum, item) => sum + item.committed,
     0
   );
   const progressPercent = Math.round((totalCommitted / totalNeeded) * 100);
 
+  const handleSubmitCommitment = async () => {
+    setIsSubmitting(true);
+    
+    const commitmentData = Object.entries(selectedItems)
+      .filter(([, amount]) => amount > 0)
+      .map(([itemId, amount]) => ({ itemId, amount }));
+
+    try {
+      const response = await fetch("/api/commitments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          postId,
+          userName,
+          commitments: commitmentData,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setLocalCommitmentItems(
+          data.commitmentItems.map((item: { itemId: string; name: string; needed: number; committed: number; icon: string }) => ({
+            id: item.itemId,
+            name: item.name,
+            needed: item.needed,
+            committed: item.committed,
+            icon: item.icon,
+          }))
+        );
+        setLocalCommitments(data.commitments);
+        setMakeCommitment(false);
+        setSelectedItems({});
+      } else {
+        const error = await response.json();
+        alert(error.error || "Failed to submit commitment");
+      }
+    } catch (error) {
+      alert("Failed to submit commitment");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden max-w-md">
       <div className="p-3">
-        <p className="font-semibold">{accountName}</p>
+      <div className="flex items-center justify-between">
+        <div>
+        <button
+          className="font-semibold"
+          onClick={() =>
+          (window.location.href = `/profile/${encodeURIComponent(
+            accountName
+          )}`)
+          }
+        >
+          {accountName}
+        </button>
         {date && <p className="text-xs text-gray-500">{date}</p>}
+        </div>
+
+        <div className="flex items-center gap-2 ml-4">
+        {localCommitmentItems.map((item, index) => (
+          <div
+          key={item.id || index}
+          className="w-10 h-10 rounded-full bg-white flex items-center justify-center"
+          title={item.name}
+          >
+          <FontAwesomeIcon
+            icon={iconMap[item.icon] || faBox}
+            className="text-green-500 text-med"
+          />
+          </div>
+        ))}
+        </div>
+      </div>
       </div>
       <div className="relative w-full h-64">
         <Image src={imageUrl} alt={caption} fill className="object-cover" />
@@ -123,7 +209,7 @@ export default function Post({
               </div>
 
               <div className="flex gap-4 mt-4 justify-center">
-                {commitmentItems.map((item, index) => (
+                {localCommitmentItems.map((item, index) => (
                   <div key={item.id || index} className="text-center">
                     <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow mb-1">
                       <FontAwesomeIcon
@@ -144,8 +230,8 @@ export default function Post({
               <h3 className="font-semibold mb-3 text-gray-700">
                 Recent Commitments
               </h3>
-              {commitments.length > 0 ? (
-                commitments.map((commitment, index) => (
+              {localCommitments.length > 0 ? (
+                localCommitments.map((commitment, index) => (
                   <div
                     key={index}
                     className="flex items-center gap-3 py-2 border-b last:border-b-0"
@@ -177,6 +263,10 @@ export default function Post({
               <button
                 className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold"
                 onClick={() => {
+                  if (!userName) {
+                    router.push('/Account/Login');
+                    return;
+                  }
                   setShowCommitments(false);
                   setMakeCommitment(true);
                 }}
@@ -204,13 +294,12 @@ export default function Post({
             <div className="flex-1 overflow-y-auto p-4">
               <p className="text-gray-600 mb-4">Select items you want to commit to {accountName}:</p>
               
-              {commitmentItems.map((item, index) => {
+              {localCommitmentItems.map((item, index) => {
                 const remaining = item.needed - item.committed;
-                const itemKey = item.id || `item-${index}`;
-                const currentAmount = selectedItems[itemKey] || 0;
+                const currentAmount = selectedItems[item.id] || 0;
                 
                 return (
-                  <div key={itemKey} className="flex items-center gap-4 py-4 border-b last:border-b-0">
+                  <div key={item.id || index} className="flex items-center gap-4 py-4 border-b last:border-b-0">
                     <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
                       <FontAwesomeIcon
                         icon={iconMap[item.icon] || faBox}
@@ -231,7 +320,7 @@ export default function Post({
                           if (currentAmount > 0) {
                             setSelectedItems({
                               ...selectedItems,
-                              [itemKey]: currentAmount - 1,
+                              [item.id]: currentAmount - 1,
                             });
                           }
                         }}
@@ -248,7 +337,7 @@ export default function Post({
                           if (currentAmount < remaining) {
                             setSelectedItems({
                               ...selectedItems,
-                              [itemKey]: currentAmount + 1,
+                              [item.id]: currentAmount + 1,
                             });
                           }
                         }}
@@ -272,13 +361,10 @@ export default function Post({
               </div>
               <button
                 className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed"
-                disabled={Object.values(selectedItems).reduce((sum, val) => sum + val, 0) === 0}
-                onClick={() => {
-                  setMakeCommitment(false);
-                  setSelectedItems({});
-                }}
+                disabled={Object.values(selectedItems).reduce((sum, val) => sum + val, 0) === 0 || isSubmitting}
+                onClick={handleSubmitCommitment}
               >
-                Confirm Commitment
+                {isSubmitting ? "Submitting" : "Confirm Commitment"}
               </button>
             </div>
           </div>

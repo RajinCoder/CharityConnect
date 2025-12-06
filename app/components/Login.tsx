@@ -22,8 +22,7 @@ export default function LoginModal() {
 
     if (response.ok) {
       router.push("/Account/Profile");
-    } else {
-      // Handle errors
+      router.refresh();
     }
   }
   return (

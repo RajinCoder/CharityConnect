@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const commitmentItemSchema = new mongoose.Schema({
+  itemId: { type: String, required: true },
   name: { type: String, required: true },
   needed: { type: Number, required: true },
   committed: { type: Number, default: 0 },
