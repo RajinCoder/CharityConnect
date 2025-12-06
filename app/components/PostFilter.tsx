@@ -87,7 +87,7 @@ export default function PostFilter({ posts, userName }: PostFilterProps) {
         <div className="bg-white rounded-lg shadow-md p-4 mb-4">
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
