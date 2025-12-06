@@ -4,11 +4,6 @@ import { getCurrentUser } from "@/lib/auth";
 import UserGreetingButton from "../components/UserGreetingButton";
 
 
-type UserPayload = {
-  id: string;
-  name: string;
-  email: string;
-};
 
 export default async function HomeNavBar() {
   const user = await getCurrentUser();
