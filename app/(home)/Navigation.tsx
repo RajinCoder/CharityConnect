@@ -1,7 +1,5 @@
 import Link from "next/link";
 import LogoutButton from "../components/LogoutButton";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHome } from "@fortawesome/free-solid-svg-icons";
 import { getCurrentUser } from "@/lib/auth";
 
 type UserPayload = {
