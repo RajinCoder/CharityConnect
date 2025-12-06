@@ -1,6 +1,8 @@
 import Link from "next/link";
 import LogoutButton from "../components/LogoutButton";
 import { getCurrentUser } from "@/lib/auth";
+import UserGreetingButton from "../components/UserGreetingButton";
+
 
 type UserPayload = {
   id: string;
@@ -22,7 +24,7 @@ export default async function HomeNavBar() {
       <div className="flex gap-4 items-center">
         {user ? (
           <>
-            <span>Hello, {user.name}</span>
+            <UserGreetingButton name={user.name} />
             <LogoutButton />
           </>
         ) : (
