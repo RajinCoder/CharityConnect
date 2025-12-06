@@ -15,6 +15,8 @@ export async function POST(request: Request) {
       return Response.json({ error: "Invalid credentials" }, { status: 400 });
     }
 
+    console.log("User from DB:", { email: user.email, name: user.name, userType: user.userType });
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return new Response(
@@ -24,7 +26,7 @@ export async function POST(request: Request) {
     }
 
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    const jwt = await new SignJWT({ sub: user._id.toString(), email: user.email, name: user.name })
+    const jwt = await new SignJWT({ sub: user._id.toString(), email: user.email, name: user.name, userType: user.userType })
       .setProtectedHeader({ alg: "HS256", typ: "JWT" })
       .setIssuedAt()
       .setExpirationTime("2h")

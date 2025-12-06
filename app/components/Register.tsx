@@ -23,7 +23,7 @@ export default function RegisterModal() {
 
     if (response.ok) {
       router.push("/Account/Profile");
-      router.refresh(); // Force reload to update the navigation bar
+      router.refresh();
     } else {
       // Handle errors
     }

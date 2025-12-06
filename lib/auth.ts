@@ -5,6 +5,7 @@ export type UserPayload = {
   id: string;
   name: string;
   email: string;
+  userType: string;
 };
 
 export async function getCurrentUser(): Promise<UserPayload | null> {
@@ -16,8 +17,15 @@ export async function getCurrentUser(): Promise<UserPayload | null> {
   try {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
-    return payload as UserPayload;
+    const result = {
+      id: payload.sub as string,
+      name: payload.name as string,
+      email: payload.email as string,
+      userType: payload.userType as string,
+    };
+    return result;
   } catch (err) {
+    console.log("Auth error:", err);
     return null;
   }
 }

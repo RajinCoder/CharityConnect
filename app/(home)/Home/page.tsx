@@ -2,8 +2,8 @@ import Post from "@/app/components/Post";
 import PostFilter from "@/app/components/PostFilter";
 import dbConnect from "@/lib/mongoose";
 import PostModel from "@/models/Post";
-import { cookies } from "next/headers";
-import { jwtVerify } from "jose";
+import CharityTaskBar from "@/app/components/CharityTaskBar";
+import { getCurrentUser } from "@/lib/auth";
 
 interface CommitmentItem {
   itemId: string;
@@ -30,12 +30,6 @@ interface PostData {
   date: string;
 }
 
-type UserPayload = {
-  id: string;
-  name: string;
-  email: string;
-};
-
 async function getPosts(): Promise<PostData[]> {
   await dbConnect();
   const posts = await PostModel.find({}).sort({ createdAt: -1 }).lean();
@@ -44,21 +38,8 @@ async function getPosts(): Promise<PostData[]> {
 
 export default async function DashboardPage() {
   const posts = await getPosts();
-  const cookieStore = cookies();
-  const token = (await cookieStore).get("token")?.value;
-
-  let user: UserPayload | null = null;
-
-  if (token) {
-    try {
-      const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-      const { payload } = await jwtVerify(token, secret);
-      user = payload as UserPayload;
-    } catch (err) {
-      // invalid or expired token
-    }
-  }
-
+  const user = await getCurrentUser();
+  
   return (
     <div className="min-h-screen bg-gray-100 py-8">
       {posts.length > 0 ? (
@@ -81,6 +62,9 @@ export default async function DashboardPage() {
             }))}
             userName={user?.name}
           />
+          {user?.userType === "charity" && (
+            <CharityTaskBar />
+          )}
         </div>
       ) : (
         <div className="flex justify-center">
