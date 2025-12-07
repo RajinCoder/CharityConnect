@@ -13,6 +13,7 @@ const commitmentSchema = new mongoose.Schema({
   itemName: { type: String, required: true },
   amount: { type: Number, required: true },
   date: { type: String, required: true },
+  commiterId: { type: String, required: true },
 });
 
 const postSchema = new mongoose.Schema({

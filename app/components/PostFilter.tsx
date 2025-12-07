@@ -13,6 +13,7 @@ interface CommitmentItem {
 
 interface Commitment {
   userName: string;
+  commiterId: string;
   itemName: string;
   amount: number;
   date: string;
@@ -23,6 +24,7 @@ interface PostData {
   imageUrl: string;
   caption: string;
   accountName: string;
+  userId: string;
   commitmentItems: CommitmentItem[];
   commitments: Commitment[];
   date: string;
@@ -31,9 +33,10 @@ interface PostData {
 interface PostFilterProps {
   posts: PostData[];
   userName?: string;
+  userId?: string;
 }
 
-export default function PostFilter({ posts, userName }: PostFilterProps) {
+export default function PostFilter({ posts, userName, userId }: PostFilterProps) {
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -128,10 +131,12 @@ export default function PostFilter({ posts, userName }: PostFilterProps) {
               imageUrl={post.imageUrl}
               caption={post.caption}
               accountName={post.accountName}
+              userId={post.userId}
               commitmentItems={post.commitmentItems}
               commitments={post.commitments}
               date={post.date}
               userName={userName}
+              committerUserId={userId}
             />
           ))
         ) : (

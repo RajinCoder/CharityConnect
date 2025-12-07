@@ -15,6 +15,7 @@ import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
 interface Commitment {
   userName: string;
+  commiterId: string;
   itemName: string;
   amount: number;
   date: string;
@@ -33,10 +34,12 @@ interface PostProps {
   imageUrl: string;
   caption: string;
   accountName: string;
+  userId: string;
   commitmentItems: CommitmentItem[];
   commitments: Commitment[];
   date?: string;
   userName?: string;
+  committerUserId?: string;
   canDelete?: boolean;
   onDelete?: (postId: string) => void;
 }
@@ -52,10 +55,12 @@ export default function Post({
   imageUrl,
   caption,
   accountName,
+  userId,
   commitmentItems,
   commitments,
   date,
   userName,
+  committerUserId,
   canDelete = false,
   onDelete,
 }: PostProps) {
@@ -137,6 +142,7 @@ export default function Post({
         body: JSON.stringify({
           postId,
           userName,
+          userId: committerUserId,
           commitments: commitmentData,
         }),
       });
@@ -148,12 +154,14 @@ export default function Post({
             (item: {
               itemId: string;
               name: string;
+              userId: string;
               needed: number;
               committed: number;
               icon: string;
             }) => ({
               id: item.itemId,
               name: item.name,
+              userId: item.userId,
               needed: item.needed,
               committed: item.committed,
               icon: item.icon,
@@ -179,16 +187,12 @@ export default function Post({
       <div className="p-3">
         <div className="flex items-center justify-between">
           <div className="flex-1 min-w-0">
-            <button
-              className="font-semibold truncate"
-              onClick={() =>
-                (window.location.href = `/profile/${encodeURIComponent(
-                  accountName
-                )}`)
-              }
+            <a
+              href={`/Account/Profile/${encodeURIComponent(userId)}`}
+              className="font-semibold truncate block"  
             >
               {accountName}
-            </button>
+            </a>
             {date && (
               <p className="text-xs text-gray-500">{formatTimestamp(date)}</p>
             )}
@@ -305,24 +309,20 @@ export default function Post({
                     key={index}
                     className="flex items-center gap-3 py-2 border-b last:border-b-0"
                   >
-                    <button
+                    <a
+                      href={`Account/Profile/${encodeURIComponent(commitment.commiterId)}`}
                       className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm font-bold text-gray-600 hover:bg-gray-300"
-                      onClick={() =>
-                        (window.location.href = `/profile/${encodeURIComponent(
-                          commitment.userName
-                        )}`)
-                      }
                     >
                       {commitment.userName.charAt(0).toUpperCase()}
-                    </button>
+                    </a>
                     <div className="flex-1">
                       <p className="text-sm">
-                        <button 
-                          onClick={() => (window.location.href = `/profile/${encodeURIComponent(commitment.userName)}`)}
+                        <a 
+                          href={`/Account/Profile/${encodeURIComponent(commitment.commiterId)}`}
                           className="font-semibold hover:text-green-600 hover:underline transition-colors"
                         >
                           {commitment.userName}
-                        </button>{" "}
+                        </a>{" "}
                         committed {commitment.amount} {commitment.itemName}
                       </p>
                       <p className="text-xs text-gray-400">{formatTimestamp(commitment.date)}</p>
