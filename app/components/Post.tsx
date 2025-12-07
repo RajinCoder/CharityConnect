@@ -12,7 +12,6 @@ import {
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
-import { redirect } from "next/navigation";
 
 interface Commitment {
   userName: string;
@@ -76,6 +75,26 @@ export default function Post({
     0
   );
   const progressPercent = Math.round((totalCommitted / totalNeeded) * 100);
+
+  const formatTimestamp = (iso?: string) => {
+    if (!iso) return "";
+    const t = Date.parse(iso);
+    if (Number.isNaN(t)) return iso;
+    const diff = Date.now() - t;
+    const minute = 60 * 1000;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+    if (diff < hour) {
+      const mins = Math.max(1, Math.floor(diff / minute));
+      return `${mins}m ago`;
+    }
+    if (diff < day) {
+      const hrs = Math.max(1, Math.floor(diff / hour));
+      return `${hrs}h ago`;
+    }
+    const d = new Date(t);
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  };
 
   const handleSubmitCommitment = async () => {
     setIsSubmitting(true);
@@ -143,7 +162,9 @@ export default function Post({
             >
               {accountName}
             </button>
-            {date && <p className="text-xs text-gray-500">{date}</p>}
+            {date && (
+              <p className="text-xs text-gray-500">{formatTimestamp(date)}</p>
+            )}
           </div>
 
           <div className="flex items-center gap-2 ml-4">
@@ -262,7 +283,7 @@ export default function Post({
                         </button>{" "}
                         committed {commitment.amount} {commitment.itemName}
                       </p>
-                      <p className="text-xs text-gray-400">{commitment.date}</p>
+                      <p className="text-xs text-gray-400">{formatTimestamp(commitment.date)}</p>
                     </div>
                   </div>
                 ))

@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       item.committed = (item.committed || 0) + add;
 
       post.commitments.push({
-        userName: userName || "Anonymous",
+        userName: userName,
         itemName: item.name,
         amount: add,
         date: now,

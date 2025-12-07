@@ -46,8 +46,10 @@ export default function PostFilter({ posts, userName }: PostFilterProps) {
   const itemTypes = Array.from(itemTypeSet).sort();
 
   let filteredPosts: PostData[] = [];
-  const checkedItemNames = Object.keys(checkedItems).filter((key) => checkedItems[key]);
-  
+  const checkedItemNames = Object.keys(checkedItems).filter(
+    (key) => checkedItems[key]
+  );
+
   if (checkedItemNames.length === 0) {
     filteredPosts = posts;
   } else {
@@ -100,7 +102,10 @@ export default function PostFilter({ posts, userName }: PostFilterProps) {
           </label>
           <div className="space-y-2">
             {itemTypes.map((type) => (
-              <label key={type} className="flex items-center gap-2 cursor-pointer">
+              <label
+                key={type}
+                className="flex items-center gap-2 cursor-pointer"
+              >
                 <input
                   type="checkbox"
                   checked={checkedItems[type] || false}
@@ -130,9 +135,7 @@ export default function PostFilter({ posts, userName }: PostFilterProps) {
             />
           ))
         ) : (
-          <p className="text-center text-gray-500">
-            No posts found.
-          </p>
+          <p className="text-center text-gray-500">No posts found.</p>
         )}
       </div>
     </div>
