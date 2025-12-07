@@ -36,7 +36,11 @@ interface PostFilterProps {
   userId?: string;
 }
 
-export default function PostFilter({ posts, userName, userId }: PostFilterProps) {
+export default function PostFilter({
+  posts,
+  userName,
+  userId,
+}: PostFilterProps) {
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -88,7 +92,7 @@ export default function PostFilter({ posts, userName, userId }: PostFilterProps)
 
   return (
     <div className="w-full flex gap-6">
-      <div className="w-64 flex-shrink-0">
+      <div className="w-64 shrink-0">
         <div className="bg-white rounded-lg shadow-md p-4 mb-4">
           <input
             type="text"
