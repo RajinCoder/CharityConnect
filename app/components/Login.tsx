@@ -6,6 +6,7 @@ import Link from "next/link";
 import ErrorModal from "./ErrorModal";
 
 export default function LoginModal() {
+  const [loginSuccess, setLoginSuccess] = useState(false);
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -32,6 +33,7 @@ export default function LoginModal() {
     });
 
     if (response.ok) {
+      setLoginSuccess(true);
       router.push("/Account/Profile");
       router.refresh();
     } else {
@@ -39,6 +41,22 @@ export default function LoginModal() {
       setErrorMessage(errorData.error || "Login failed");
     }
   }
+
+  if (loginSuccess) {
+    return (
+      <div className="flex flex-col items-center justify-center border-gray-400 border shadow-lg px-6 py-10 gap-6 rounded-xl w-1/3">
+        <h2 className="text-2xl font-bold text-green-600">Login Successful!</h2>
+        <p className="text-gray-700">Welcome back!</p>
+        <Link 
+          href="/Account/Profile" 
+          className="btn"
+        >
+          Go to Profile
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <>
       <form

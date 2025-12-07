@@ -9,8 +9,8 @@ import ErrorModal from "./ErrorModal";
 const libraries: "places"[] = ["places"];
 
 export default function RegisterModal() {
-  const router = useRouter();
   const [isCharity, setIsCharity] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [street, setStreet] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
@@ -117,13 +117,28 @@ export default function RegisterModal() {
     });
 
     if (response.ok) {
-      router.push("/Account/Profile");
-      router.refresh();
+      setRegistrationSuccess(true);
     } else {
       const errorData = await response.json();
       setErrorMessage(errorData.error || "Registration failed");
     }
   }
+
+  if (registrationSuccess) {
+    return (
+      <div className="flex flex-col items-center justify-center border-gray-400 border shadow-lg px-6 py-10 gap-6 rounded-xl w-1/3">
+        <h2 className="text-2xl font-bold text-green-600">Registration Successful!</h2>
+        <p className="text-gray-700">Your account has been created.</p>
+        <Link 
+          href="/Account/Profile" 
+          className="btn"
+        >
+          Go to Profile
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <>
       <form
