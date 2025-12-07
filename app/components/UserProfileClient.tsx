@@ -8,6 +8,7 @@ interface PostData {
   imageUrl: string;
   caption: string;
   accountName: string;
+  userId: string;
   commitmentItems: any[];
   commitments: any[];
   date: string;
@@ -121,6 +122,7 @@ export default function UserProfileClient({
             imageUrl={post.imageUrl}
             caption={post.caption}
             accountName={post.accountName}
+            userId={post.userId}
             commitmentItems={post.commitmentItems}
             commitments={post.commitments}
             date={post.date}

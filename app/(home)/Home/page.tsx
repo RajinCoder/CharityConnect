@@ -15,6 +15,7 @@ interface CommitmentItem {
 
 interface Commitment {
   userName: string;
+  commiterId: string;
   itemName: string;
   amount: number;
   date: string;
@@ -25,6 +26,7 @@ interface PostData {
   imageUrl: string;
   caption: string;
   accountName: string;
+  userId: string;
   commitmentItems: CommitmentItem[];
   commitments: Commitment[];
   date: string;
@@ -52,6 +54,7 @@ export default async function DashboardPage() {
                   imageUrl: post.imageUrl,
                   caption: post.caption,
                   accountName: post.accountName,
+                  userId: post.userId,
                   commitmentItems: post.commitmentItems.map((item) => ({
                     id: item.itemId,
                     name: item.name,
@@ -63,6 +66,7 @@ export default async function DashboardPage() {
                   date: post.date,
                 }))}
                 userName={user?.name}
+                userId={user?.id} 
               />
             ) : (
               <div className="bg-white rounded-lg shadow-md p-8 text-center">

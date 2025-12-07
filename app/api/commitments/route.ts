@@ -5,9 +5,9 @@ import Post from "@/models/Post";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { postId, userName, commitments } = body;
+    const { postId, userName, userId, commitments } = body;
 
-    if (!postId || !commitments || !Array.isArray(commitments)) {
+    if (!postId || !commitments || !Array.isArray(commitments) || !userId) {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
 
@@ -41,6 +41,7 @@ export async function POST(request: Request) {
         itemName: item.name,
         amount: add,
         date: now,
+        commiterId: userId,
       });
     }
 
