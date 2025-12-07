@@ -1,4 +1,5 @@
 "use client";
+import { useFollow } from "@/hooks/useFollow";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -11,6 +12,7 @@ export default function UserProfileClient({
 }) {
   const [name, setName] = useState(user?.name ?? "");
   const [isEditing, setIsEditing] = useState(false);
+  const { followed, loading, handleFollow } = useFollow(user?._id ?? "");
 
   const handleSave = async () => {
     const response = await fetch("/api/auth/update", {
@@ -54,7 +56,7 @@ export default function UserProfileClient({
             className="input_box profile-email"
             disabled
           />
-          {isOwner && (
+          {isOwner ? (
             <div className="profile-btns">
               <button
                 className="btn profile-edit-btn"
@@ -66,6 +68,12 @@ export default function UserProfileClient({
                 Save
               </button>
             </div>
+          ) : (
+            !loading && (
+              <button onClick={handleFollow} className="btn">
+                {followed ? "Unfollow" : "Follow"}
+              </button>
+            )
           )}
         </div>
       </div>

@@ -1,5 +1,3 @@
-import { getCurrentUser } from "@/lib/auth";
-import Link from "next/link";
 import UserProfileClient from "./UserProfileClient";
 
 export default async function UserProfile({
