@@ -1,11 +1,22 @@
 "use client";
 
-import { FormEvent } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import ErrorModal from "./ErrorModal";
 
 export default function LoginModal() {
   const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => {
+        setErrorMessage("");
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -23,33 +34,39 @@ export default function LoginModal() {
     if (response.ok) {
       router.push("/Account/Profile");
       router.refresh();
+    } else {
+      const errorData = await response.json();
+      setErrorMessage(errorData.error || "Login failed");
     }
   }
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col  border-gray-400 border shadow-lg px-6 py-10 gap-6 rounded-xl w-1/3 h-1/2"
-    >
-      <input
-        className="input_box"
-        type="email"
-        name="email"
-        placeholder="Email"
-        required
-      />
-      <input
-        className="input_box"
-        type="password"
-        name="password"
-        placeholder="Password"
-        required
-      />
-      <button className="btn" type="submit">
-        Login
-      </button>
-      <Link href="Register" className="text-blue-500 hover:underline">
-        Register
-      </Link>
-    </form>
+    <>
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col  border-gray-400 border shadow-lg px-6 py-10 gap-6 rounded-xl w-1/3 h-1/2"
+      >
+        <input
+          className="input_box"
+          type="email"
+          name="email"
+          placeholder="Email"
+          required
+        />
+        <input
+          className="input_box"
+          type="password"
+          name="password"
+          placeholder="Password"
+          required
+        />
+        <button className="btn" type="submit">
+          Login
+        </button>
+        <Link href="Register" className="text-blue-500 hover:underline">
+          Register
+        </Link>
+      </form>
+      {errorMessage && <ErrorModal message={errorMessage} />}
+    </>
   );
 }
