@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useFollow } from "@/hooks/useFollow";
 import Link from "next/link";
@@ -20,7 +21,7 @@ export default function UserProfileClient({
   isOwner,
   posts = [],
 }: {
-  user: { _id: string; name: string; email: string } | null;
+  user: { _id: string; name: string; email: string; userType: string } | null;
   isOwner: boolean;
   posts?: PostData[];
 }) {
@@ -117,28 +118,33 @@ export default function UserProfileClient({
           )}
         </div>
       </div>
-
-      <h2 className="posts-heading mt-8 text-2xl font-bold text-center">
-        {localPosts.length > 0 ? `Your posts` : "No posts yet"}
-      </h2>
-      <div className="pledged-posts">
-        {localPosts.map((post) => (
-          <Post
-            key={post._id}
-            postId={post._id}
-            imageUrl={post.imageUrl}
-            caption={post.caption}
-            accountName={post.accountName}
-            userId={post.userId}
-            commitmentItems={post.commitmentItems}
-            commitments={post.commitments}
-            date={post.date}
-            userName={user?.name}
-            canDelete={isOwner}
-            onDelete={handleDeletePost}
-          />
-        ))}
-      </div>
+      {user?.userType === "charity" && (
+        <>
+          <h2 className="posts-heading mt-8 text-2xl font-bold text-center">
+            {localPosts.length > 0
+              ? `${isOwner ? "Your" : `${user?.name}'s`} posts`
+              : "No posts yet"}
+          </h2>
+          <div className="pledged-posts">
+            {localPosts.map((post) => (
+              <Post
+                key={post._id}
+                postId={post._id}
+                imageUrl={post.imageUrl}
+                caption={post.caption}
+                accountName={post.accountName}
+                userId={post.userId}
+                commitmentItems={post.commitmentItems}
+                commitments={post.commitments}
+                date={post.date}
+                userName={user?.name}
+                canDelete={isOwner}
+                onDelete={handleDeletePost}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
