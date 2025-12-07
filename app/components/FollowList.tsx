@@ -42,9 +42,14 @@ export default function FollowList({
           onChange={(e) => handleSearch(e.target.value)}
         />
         <ul className="follow-list-container">
-          {filteredUsers.map((user) => (
-            <Account key={user._id} user={user} />
-          ))}
+          {filteredUsers.map((user) => {
+            console.log("User in FollowList:", user);
+            return (
+              <li key={user._id}>
+                <Account user={user} />
+              </li>
+            );
+          })}
         </ul>
       </div>
     </div>
