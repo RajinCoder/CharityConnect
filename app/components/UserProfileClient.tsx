@@ -51,7 +51,6 @@ export default function UserProfileClient({
         alert("Profile updated successfully!");
         window.location.reload();
       } else {
-        const error = await response.json();
         alert("Failed to update profile.");
       }
     } catch (error) {
