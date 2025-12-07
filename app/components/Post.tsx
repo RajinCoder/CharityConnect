@@ -12,10 +12,10 @@ import {
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
-import { redirect } from "next/navigation";
 
 interface Commitment {
   userName: string;
+  commiterId: string;
   itemName: string;
   amount: number;
   date: string;
@@ -34,10 +34,14 @@ interface PostProps {
   imageUrl: string;
   caption: string;
   accountName: string;
+  userId: string;
   commitmentItems: CommitmentItem[];
   commitments: Commitment[];
   date?: string;
   userName?: string;
+  committerUserId?: string;
+  canDelete?: boolean;
+  onDelete?: (postId: string) => void;
 }
 
 const iconMap: Record<string, IconDefinition> = {
@@ -51,10 +55,14 @@ export default function Post({
   imageUrl,
   caption,
   accountName,
+  userId,
   commitmentItems,
   commitments,
   date,
   userName,
+  committerUserId,
+  canDelete = false,
+  onDelete,
 }: PostProps) {
   const [showCommitments, setShowCommitments] = useState(false);
   const [makeCommitment, setMakeCommitment] = useState(false);
@@ -62,10 +70,33 @@ export default function Post({
     {}
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [localCommitmentItems, setLocalCommitmentItems] =
     useState(commitmentItems);
   const [localCommitments, setLocalCommitments] = useState(commitments);
   const router = useRouter();
+
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this post?')) return;
+    
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/posts/${postId}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        onDelete?.(postId);
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to delete post');
+      }
+    } catch (error) {
+      alert('Failed to delete post');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const totalNeeded = localCommitmentItems.reduce(
     (sum, item) => sum + item.needed,
@@ -76,6 +107,26 @@ export default function Post({
     0
   );
   const progressPercent = Math.round((totalCommitted / totalNeeded) * 100);
+
+  const formatTimestamp = (iso?: string) => {
+    if (!iso) return "";
+    const t = Date.parse(iso);
+    if (Number.isNaN(t)) return iso;
+    const diff = Date.now() - t;
+    const minute = 60 * 1000;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+    if (diff < hour) {
+      const mins = Math.max(1, Math.floor(diff / minute));
+      return `${mins}m ago`;
+    }
+    if (diff < day) {
+      const hrs = Math.max(1, Math.floor(diff / hour));
+      return `${hrs}h ago`;
+    }
+    const d = new Date(t);
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  };
 
   const handleSubmitCommitment = async () => {
     setIsSubmitting(true);
@@ -91,6 +142,7 @@ export default function Post({
         body: JSON.stringify({
           postId,
           userName,
+          userId: committerUserId,
           commitments: commitmentData,
         }),
       });
@@ -102,12 +154,14 @@ export default function Post({
             (item: {
               itemId: string;
               name: string;
+              userId: string;
               needed: number;
               committed: number;
               icon: string;
             }) => ({
               id: item.itemId,
               name: item.name,
+              userId: item.userId,
               needed: item.needed,
               committed: item.committed,
               icon: item.icon,
@@ -129,28 +183,36 @@ export default function Post({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden max-w-md">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden w-full max-w-md mx-auto">
       <div className="p-3">
         <div className="flex items-center justify-between">
-          <div>
-            <button
-              className="font-semibold"
-              onClick={() =>
-                (window.location.href = `/profile/${encodeURIComponent(
-                  accountName
-                )}`)
-              }
+          <div className="flex-1 min-w-0">
+            <a
+              href={`/Account/Profile/${encodeURIComponent(userId)}`}
+              className="font-semibold truncate block"  
             >
               {accountName}
-            </button>
-            {date && <p className="text-xs text-gray-500">{date}</p>}
+            </a>
+            {date && (
+              <p className="text-xs text-gray-500">{formatTimestamp(date)}</p>
+            )}
           </div>
 
-          <div className="flex items-center gap-2 ml-4">
-            {localCommitmentItems.map((item, index) => (
+          <div className="flex items-center gap-2 ml-4 flex-shrink-0">
+            {canDelete && (
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="text-red-500 hover:text-red-700 px-2 py-1 text-sm font-medium disabled:opacity-50"
+                title="Delete post"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            )}
+            {localCommitmentItems.slice(0, 3).map((item, index) => (
               <div
                 key={item.id || index}
-                className="w-10 h-10 rounded-full bg-white flex items-center justify-center"
+                className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0"
                 title={item.name}
               >
                 <FontAwesomeIcon
@@ -159,6 +221,11 @@ export default function Post({
                 />
               </div>
             ))}
+            {localCommitmentItems.length > 3 && (
+              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-semibold text-gray-600">+{localCommitmentItems.length - 3}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -242,27 +309,23 @@ export default function Post({
                     key={index}
                     className="flex items-center gap-3 py-2 border-b last:border-b-0"
                   >
-                    <button
+                    <a
+                      href={`Account/Profile/${encodeURIComponent(commitment.commiterId)}`}
                       className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm font-bold text-gray-600 hover:bg-gray-300"
-                      onClick={() =>
-                        (window.location.href = `/profile/${encodeURIComponent(
-                          commitment.userName
-                        )}`)
-                      }
                     >
                       {commitment.userName.charAt(0).toUpperCase()}
-                    </button>
+                    </a>
                     <div className="flex-1">
                       <p className="text-sm">
-                        <button 
-                          onClick={() => (window.location.href = `/profile/${encodeURIComponent(commitment.userName)}`)}
+                        <a 
+                          href={`/Account/Profile/${encodeURIComponent(commitment.commiterId)}`}
                           className="font-semibold hover:text-green-600 hover:underline transition-colors"
                         >
                           {commitment.userName}
-                        </button>{" "}
+                        </a>{" "}
                         committed {commitment.amount} {commitment.itemName}
                       </p>
-                      <p className="text-xs text-gray-400">{commitment.date}</p>
+                      <p className="text-xs text-gray-400">{formatTimestamp(commitment.date)}</p>
                     </div>
                   </div>
                 ))

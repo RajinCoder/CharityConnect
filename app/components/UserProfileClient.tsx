@@ -2,29 +2,64 @@
 import { useFollow } from "@/hooks/useFollow";
 import Link from "next/link";
 import { useState } from "react";
+import Post from "./Post";
+
+interface PostData {
+  _id: string;
+  imageUrl: string;
+  caption: string;
+  accountName: string;
+  userId: string;
+  commitmentItems: any[];
+  commitments: any[];
+  date: string;
+}
 
 export default function UserProfileClient({
   user,
   isOwner,
+  posts = [],
 }: {
   user: { _id: string; name: string; email: string } | null;
   isOwner: boolean;
+  posts?: PostData[];
 }) {
   const [name, setName] = useState(user?.name ?? "");
   const [isEditing, setIsEditing] = useState(false);
   const { followed, loading, handleFollow } = useFollow(user?._id ?? "");
+  const [localPosts, setLocalPosts] = useState(posts);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleDeletePost = (postId: string) => {
+    setLocalPosts((prev) => prev.filter((post) => post._id !== postId));
+  };
 
   const handleSave = async () => {
-    const response = await fetch("/api/auth/update", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: user?.email, newName: name }),
-    });
+    if (!name.trim()) {
+      alert("Name cannot be empty.");
+      return;
+    }
 
-    if (response.ok) {
-      setIsEditing(false);
-    } else {
-      alert("Failed to update profile.");
+    setIsSaving(true);
+    try {
+      const response = await fetch("/api/auth/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user?.email, newName: name }),
+      });
+
+      if (response.ok) {
+        setIsEditing(false);
+        alert("Profile updated successfully!");
+        window.location.reload();
+      } else {
+        alert("Failed to update profile.");
+      }
+    } catch (error) {
+      console.error("Update error:", error);
+      alert("Failed to update profile. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
   };
   return (
@@ -61,11 +96,16 @@ export default function UserProfileClient({
               <button
                 className="btn profile-edit-btn"
                 onClick={() => setIsEditing(true)}
+                disabled={isEditing}
               >
                 Edit
               </button>
-              <button className="btn profile-save-btn" onClick={handleSave}>
-                Save
+              <button
+                className="btn profile-save-btn"
+                onClick={handleSave}
+                disabled={isSaving || !isEditing}
+              >
+                {isSaving ? "Saving..." : "Save"}
               </button>
             </div>
           ) : (
@@ -78,15 +118,26 @@ export default function UserProfileClient({
         </div>
       </div>
 
+      <h2 className="posts-heading mt-8 text-2xl font-bold text-center">
+        {localPosts.length > 0 ? `Your posts` : "No posts yet"}
+      </h2>
       <div className="pledged-posts">
-        <div className="posts">
-          <h2>Title of Post</h2>
-          <div>List of pledges for that post</div>
-        </div>
-        <div className="posts">
-          <h2>Title of Post</h2>
-          <div>List of pledges for that post</div>
-        </div>
+        {localPosts.map((post) => (
+          <Post
+            key={post._id}
+            postId={post._id}
+            imageUrl={post.imageUrl}
+            caption={post.caption}
+            accountName={post.accountName}
+            userId={post.userId}
+            commitmentItems={post.commitmentItems}
+            commitments={post.commitments}
+            date={post.date}
+            userName={user?.name}
+            canDelete={isOwner}
+            onDelete={handleDeletePost}
+          />
+        ))}
       </div>
     </div>
   );

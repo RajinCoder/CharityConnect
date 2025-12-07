@@ -8,6 +8,18 @@ const userSchema = new mongoose.Schema({
   userType: { type: String, enum: ["user", "charity"], default: "user" },
   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  address: {
+    street: { type: String },
+    city: { type: String },
+    state: { type: String },
+    zipCode: { type: String },
+    formattedAddress: { type: String },
+    placeId: { type: String },
+    coordinates: {
+      lat: { type: Number },
+      lng: { type: Number },
+    },
+  },
   createdAt: { type: Date, default: Date.now },
 });
 

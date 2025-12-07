@@ -13,6 +13,7 @@ interface CommitmentItem {
 
 interface Commitment {
   userName: string;
+  commiterId: string;
   itemName: string;
   amount: number;
   date: string;
@@ -23,6 +24,7 @@ interface PostData {
   imageUrl: string;
   caption: string;
   accountName: string;
+  userId: string;
   commitmentItems: CommitmentItem[];
   commitments: Commitment[];
   date: string;
@@ -31,9 +33,10 @@ interface PostData {
 interface PostFilterProps {
   posts: PostData[];
   userName?: string;
+  userId?: string;
 }
 
-export default function PostFilter({ posts, userName }: PostFilterProps) {
+export default function PostFilter({ posts, userName, userId }: PostFilterProps) {
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -46,8 +49,10 @@ export default function PostFilter({ posts, userName }: PostFilterProps) {
   const itemTypes = Array.from(itemTypeSet).sort();
 
   let filteredPosts: PostData[] = [];
-  const checkedItemNames = Object.keys(checkedItems).filter((key) => checkedItems[key]);
-  
+  const checkedItemNames = Object.keys(checkedItems).filter(
+    (key) => checkedItems[key]
+  );
+
   if (checkedItemNames.length === 0) {
     filteredPosts = posts;
   } else {
@@ -100,7 +105,10 @@ export default function PostFilter({ posts, userName }: PostFilterProps) {
           </label>
           <div className="space-y-2">
             {itemTypes.map((type) => (
-              <label key={type} className="flex items-center gap-2 cursor-pointer">
+              <label
+                key={type}
+                className="flex items-center gap-2 cursor-pointer"
+              >
                 <input
                   type="checkbox"
                   checked={checkedItems[type] || false}
@@ -123,16 +131,16 @@ export default function PostFilter({ posts, userName }: PostFilterProps) {
               imageUrl={post.imageUrl}
               caption={post.caption}
               accountName={post.accountName}
+              userId={post.userId}
               commitmentItems={post.commitmentItems}
               commitments={post.commitments}
               date={post.date}
               userName={userName}
+              committerUserId={userId}
             />
           ))
         ) : (
-          <p className="text-center text-gray-500">
-            No posts found.
-          </p>
+          <p className="text-center text-gray-500">No posts found.</p>
         )}
       </div>
     </div>

@@ -6,19 +6,24 @@ export async function POST(request: Request) {
     try {
         await dbConnect();
         const {email, newName} = await request.json();
+        
         const user = await User.findOne({ email });
 
         if (!user) {
-            return new Response(
-                JSON.stringify({ error: "User not found." }),
+            return NextResponse.json(
+                { error: "User not found." },
                 { status: 404 }
             );
         }
 
-        const result = await User.updateOne({ email }, {$set: { name: newName } } );
-        console.log('Update result:', result);
+        await User.updateOne({ email }, {$set: { name: newName } } );
+
         return NextResponse.json({ message: "User updated successfully" });
     } catch (err) {
-  console.error(err);
-}
+        console.error("Update error:", err);
+        return NextResponse.json(
+            { error: "Failed to update user" },
+            { status: 500 }
+        );
+    }
 }

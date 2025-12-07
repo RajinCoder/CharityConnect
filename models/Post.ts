@@ -13,12 +13,14 @@ const commitmentSchema = new mongoose.Schema({
   itemName: { type: String, required: true },
   amount: { type: Number, required: true },
   date: { type: String, required: true },
+  commiterId: { type: String, required: true },
 });
 
 const postSchema = new mongoose.Schema({
   imageUrl: { type: String, required: true },
   caption: { type: String, required: true },
   accountName: { type: String, required: true },
+  userId: { type: String, required: true },
   commitmentItems: [commitmentItemSchema],
   commitments: [commitmentSchema],
   date: { type: String, required: true },
