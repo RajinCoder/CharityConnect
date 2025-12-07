@@ -4,6 +4,7 @@ import { useFollow } from "@/hooks/useFollow";
 import Link from "next/link";
 import { useState } from "react";
 import Post from "./Post";
+import { useRouter } from "next/navigation";
 
 interface PostData {
   _id: string;
@@ -25,6 +26,7 @@ export default function UserProfileClient({
   isOwner: boolean;
   posts?: PostData[];
 }) {
+  const router = useRouter();
   const [name, setName] = useState(user?.name ?? "");
   const [isEditing, setIsEditing] = useState(false);
   const { followed, loading, handleFollow } = useFollow(user?._id ?? "");
@@ -52,7 +54,7 @@ export default function UserProfileClient({
       if (response.ok) {
         setIsEditing(false);
         alert("Profile updated successfully!");
-        window.location.reload();
+        router.refresh();
       } else {
         alert("Failed to update profile.");
       }
