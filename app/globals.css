@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 .input_box {
-    @apply border border-gray-300 rounded-md p-2 w-full mb-6;
+    @apply border border-gray-300 rounded-md p-2 w-full mb-6; /*fix mb-6*/
 }
 
 .btn {
@@ -19,7 +19,7 @@
     @apply flex items-center justify-center gap-x-4 rounded-md text-white;
 }
 
-.follow-list {
+.follow-link {
     @apply hover:underline text-black;
 }
 
@@ -45,4 +45,20 @@
 
 .posts {
     @apply border border-black p-2 rounded-md w-fit h-full;
+}
+
+.follow-box {
+    @apply flex flex-col mx-auto py-4 rounded-xl w-[30%] h-[70vh] shadow-md;
+}
+
+.follow-owner {
+    @apply text-blue-500 font-bold border-b border-gray-300 pb-2 w-full text-center;
+}
+
+.follow-rest {
+    @apply flex-1 overflow-hidden flex flex-col;
+}
+
+.follow-list-container {
+    @apply mt-4 overflow-y-auto flex-1;
 }

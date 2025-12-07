@@ -4,8 +4,10 @@ import { useState } from "react";
 
 export default function UserProfileClient({
   user,
+  isOwner,
 }: {
-  user: { name: string; email: string } | null;
+  user: { _id: string; name: string; email: string } | null;
+  isOwner: boolean;
 }) {
   const [name, setName] = useState(user?.name ?? "");
   const [isEditing, setIsEditing] = useState(false);
@@ -27,14 +29,16 @@ export default function UserProfileClient({
     <div>
       <div className="profile">
         <div className="profile-photo"></div>
-        <div className="follow">
-          <Link href={`/${user?.name}/Following`} className="follow-list">
-            Following
-          </Link>
-          <Link href={`/${user?.name}/Followers`} className="follow-list">
-            Followers
-          </Link>
-        </div>
+        {user && (
+          <div className="follow">
+            <Link href={`/${user._id}/Following`} className="follow-link">
+              Following
+            </Link>
+            <Link href={`/${user._id}/Followers`} className="follow-link">
+              Followers
+            </Link>
+          </div>
+        )}
         <div className="profile-details">
           <input
             placeholder="User Name"
@@ -50,17 +54,19 @@ export default function UserProfileClient({
             className="input_box profile-email"
             disabled
           />
-          <div className="profile-btns">
-            <button
-              className="btn profile-edit-btn"
-              onClick={() => setIsEditing(true)}
-            >
-              Edit
-            </button>
-            <button className="btn profile-save-btn" onClick={handleSave}>
-              Save
-            </button>
-          </div>
+          {isOwner && (
+            <div className="profile-btns">
+              <button
+                className="btn profile-edit-btn"
+                onClick={() => setIsEditing(true)}
+              >
+                Edit
+              </button>
+              <button className="btn profile-save-btn" onClick={handleSave}>
+                Save
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
