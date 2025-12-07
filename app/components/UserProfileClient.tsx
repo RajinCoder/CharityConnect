@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import { useFollow } from "@/hooks/useFollow";
 import Link from "next/link";
 import { useState } from "react";
 import Post from "./Post";
+import { useRouter } from "next/navigation";
 
 interface PostData {
   _id: string;
@@ -19,12 +22,14 @@ export default function UserProfileClient({
   isOwner,
   posts = [],
 }: {
-  user: { _id: string; name: string; email: string } | null;
+  user: { _id: string; name: string; email: string; userType: string } | null;
   isOwner: boolean;
   posts?: PostData[];
 }) {
+  const router = useRouter();
   const [name, setName] = useState(user?.name ?? "");
   const [isEditing, setIsEditing] = useState(false);
+  const { followed, loading, handleFollow } = useFollow(user?._id ?? "");
   const [localPosts, setLocalPosts] = useState(posts);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -49,7 +54,7 @@ export default function UserProfileClient({
       if (response.ok) {
         setIsEditing(false);
         alert("Profile updated successfully!");
-        window.location.reload();
+        router.refresh();
       } else {
         alert("Failed to update profile.");
       }
@@ -89,7 +94,7 @@ export default function UserProfileClient({
             className="input_box profile-email"
             disabled
           />
-          {isOwner && (
+          {isOwner ? (
             <div className="profile-btns">
               <button
                 className="btn profile-edit-btn"
@@ -106,31 +111,42 @@ export default function UserProfileClient({
                 {isSaving ? "Saving..." : "Save"}
               </button>
             </div>
+          ) : (
+            !loading && (
+              <button onClick={handleFollow} className="btn">
+                {followed ? "Unfollow" : "Follow"}
+              </button>
+            )
           )}
         </div>
       </div>
-
-      <h2 className="posts-heading mt-8 text-2xl font-bold text-center">
-        {localPosts.length > 0 ? `Your posts` : "No posts yet"}
-      </h2>
-      <div className="pledged-posts">
-        {localPosts.map((post) => (
-          <Post
-            key={post._id}
-            postId={post._id}
-            imageUrl={post.imageUrl}
-            caption={post.caption}
-            accountName={post.accountName}
-            userId={post.userId}
-            commitmentItems={post.commitmentItems}
-            commitments={post.commitments}
-            date={post.date}
-            userName={user?.name}
-            canDelete={isOwner}
-            onDelete={handleDeletePost}
-          />
-        ))}
-      </div>
+      {user?.userType === "charity" && (
+        <>
+          <h2 className="posts-heading mt-8 text-2xl font-bold text-center">
+            {localPosts.length > 0
+              ? `${isOwner ? "Your" : `${user?.name}'s`} posts`
+              : "No posts yet"}
+          </h2>
+          <div className="pledged-posts">
+            {localPosts.map((post) => (
+              <Post
+                key={post._id}
+                postId={post._id}
+                imageUrl={post.imageUrl}
+                caption={post.caption}
+                accountName={post.accountName}
+                userId={post.userId}
+                commitmentItems={post.commitmentItems}
+                commitments={post.commitments}
+                date={post.date}
+                userName={user?.name}
+                canDelete={isOwner}
+                onDelete={handleDeletePost}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

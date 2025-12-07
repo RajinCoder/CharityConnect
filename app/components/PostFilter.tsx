@@ -97,7 +97,7 @@ export default function PostFilter({
 
   return (
     <div className="w-full flex gap-6">
-      <div className="w-64 flex-shrink-0">
+      <div className="w-64 shrink-0">
         <div className="bg-white rounded-lg shadow-md p-4 mb-4">
           <input
             type="text"
