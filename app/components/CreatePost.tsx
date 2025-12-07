@@ -10,6 +10,8 @@ export default function CreatePost({
   const [error, setError] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [checkedItems, setCheckedItems] = useState<Record<string, number>>({});
+  const [customItems, setCustomItems] = useState<string[]>([]);
+  const [customItemInput, setCustomItemInput] = useState("");
 
   const itemTypes = [
     "Clothes",
@@ -25,6 +27,22 @@ export default function CreatePost({
     "Bedding",
     "Household Items",
   ];
+
+  const handleAddCustomItem = () => {
+    const trimmed = customItemInput.trim();
+    if (trimmed && !itemTypes.includes(trimmed) && !customItems.includes(trimmed)) {
+      setCustomItems([...customItems, trimmed]);
+      setCheckedItems({ ...checkedItems, [trimmed]: 1 });
+      setCustomItemInput("");
+    }
+  };
+
+  const handleRemoveCustomItem = (itemName: string) => {
+    setCustomItems(customItems.filter(item => item !== itemName));
+    const copy = { ...checkedItems };
+    delete copy[itemName];
+    setCheckedItems(copy);
+  };
 
   const handleCheckChange = (itemName: string) => {
     setCheckedItems((prev) => {
@@ -217,6 +235,67 @@ export default function CreatePost({
             );
           })()}
         </div>
+        
+        {/* Custom Item Input */}
+        <div className="mt-4 pt-4 border-t">
+          <label className="block text-sm font-medium mb-2">Add Custom Item:</label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={customItemInput}
+              onChange={(e) => setCustomItemInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddCustomItem();
+                }
+              }}
+              placeholder="e.g., Water Bottles"
+              className="flex-1 p-2 border rounded text-sm"
+            />
+            <button
+              type="button"
+              onClick={handleAddCustomItem}
+              className="px-4 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+
+        {/* Display Custom Items */}
+        {customItems.length > 0 && (
+          <div className="mt-3">
+            <p className="text-sm font-medium mb-2">Custom Items:</p>
+            <div className="flex flex-wrap gap-2">
+              {customItems.map((item) => (
+                <div key={item} className="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded">
+                  <span className="text-sm">{item}</span>
+                  <input
+                    type="number"
+                    min={1}
+                    value={checkedItems[item] || 1}
+                    onChange={(e) =>
+                      handleNeededChange(
+                        item,
+                        Math.max(1, Number(e.target.value || 1))
+                      )
+                    }
+                    className="w-16 p-1 border rounded text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveCustomItem(item)}
+                    className="text-red-500 hover:text-red-700 font-bold"
+                    title="Remove item"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       <div className="flex gap-2">
         <button

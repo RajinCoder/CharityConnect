@@ -37,6 +37,8 @@ interface PostProps {
   commitments: Commitment[];
   date?: string;
   userName?: string;
+  canDelete?: boolean;
+  onDelete?: (postId: string) => void;
 }
 
 const iconMap: Record<string, IconDefinition> = {
@@ -54,6 +56,8 @@ export default function Post({
   commitments,
   date,
   userName,
+  canDelete = false,
+  onDelete,
 }: PostProps) {
   const [showCommitments, setShowCommitments] = useState(false);
   const [makeCommitment, setMakeCommitment] = useState(false);
@@ -61,10 +65,33 @@ export default function Post({
     {}
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [localCommitmentItems, setLocalCommitmentItems] =
     useState(commitmentItems);
   const [localCommitments, setLocalCommitments] = useState(commitments);
   const router = useRouter();
+
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this post?')) return;
+    
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/posts/${postId}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        onDelete?.(postId);
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to delete post');
+      }
+    } catch (error) {
+      alert('Failed to delete post');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const totalNeeded = localCommitmentItems.reduce(
     (sum, item) => sum + item.needed,
@@ -148,12 +175,12 @@ export default function Post({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden max-w-md">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden w-full max-w-md mx-auto">
       <div className="p-3">
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex-1 min-w-0">
             <button
-              className="font-semibold"
+              className="font-semibold truncate"
               onClick={() =>
                 (window.location.href = `/profile/${encodeURIComponent(
                   accountName
@@ -167,11 +194,21 @@ export default function Post({
             )}
           </div>
 
-          <div className="flex items-center gap-2 ml-4">
-            {localCommitmentItems.map((item, index) => (
+          <div className="flex items-center gap-2 ml-4 flex-shrink-0">
+            {canDelete && (
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="text-red-500 hover:text-red-700 px-2 py-1 text-sm font-medium disabled:opacity-50"
+                title="Delete post"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            )}
+            {localCommitmentItems.slice(0, 3).map((item, index) => (
               <div
                 key={item.id || index}
-                className="w-10 h-10 rounded-full bg-white flex items-center justify-center"
+                className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0"
                 title={item.name}
               >
                 <FontAwesomeIcon
@@ -180,6 +217,11 @@ export default function Post({
                 />
               </div>
             ))}
+            {localCommitmentItems.length > 3 && (
+              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-semibold text-gray-600">+{localCommitmentItems.length - 3}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

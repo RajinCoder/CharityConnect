@@ -49,6 +49,7 @@ export async function POST(request: Request) {
       imageUrl: body.imageUrl || "",
       caption: body.caption || "",
       accountName: user?.name || body.accountName || "",
+      userId: user?.id || body.userId || "",
       commitmentItems,
       commitments: body.commitments || [],
       date: body.date || new Date().toISOString(),
