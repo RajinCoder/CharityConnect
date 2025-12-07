@@ -19,6 +19,7 @@ const postSchema = new mongoose.Schema({
   imageUrl: { type: String, required: true },
   caption: { type: String, required: true },
   accountName: { type: String, required: true },
+  userId: { type: String, required: true },
   commitmentItems: [commitmentItemSchema],
   commitments: [commitmentSchema],
   date: { type: String, required: true },

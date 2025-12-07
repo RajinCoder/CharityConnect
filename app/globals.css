@@ -40,7 +40,7 @@
 }
 
 .pledged-posts {
-    @apply mt-6 p-4 flex gap-x-8 rounded-md mx-auto w-[70%] h-[25vh] shadow-md;
+    @apply mt-6 p-6 flex flex-wrap gap-6 rounded-md mx-auto max-w-6xl;
 }
 
 .posts {
