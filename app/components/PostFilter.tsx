@@ -36,29 +36,34 @@ interface PostFilterProps {
   userId?: string;
 }
 
-export default function PostFilter({ posts, userName, userId }: PostFilterProps) {
-  const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
+export default function PostFilter({
+  posts,
+  userName,
+  userId,
+}: PostFilterProps) {
+  // State for checked and search items
+  const [checkedItems, setCheckedItems] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
+  // Loop through all posts, then loop through their needed items
   const itemTypeSet = new Set<string>();
   posts.map((post) => {
     post.commitmentItems.map((item) => {
       itemTypeSet.add(item.name);
     });
   });
+  // Sort item types alphabetically
   const itemTypes = Array.from(itemTypeSet).sort();
 
   let filteredPosts: PostData[] = [];
-  const checkedItemNames = Object.keys(checkedItems).filter(
-    (key) => checkedItems[key]
-  );
 
-  if (checkedItemNames.length === 0) {
+  // Filter posts based on checked items
+  if (checkedItems.length === 0) {
     filteredPosts = posts;
   } else {
     filteredPosts = posts.filter((post) => {
       for (let i = 0; i < post.commitmentItems.length; i++) {
-        if (checkedItemNames.includes(post.commitmentItems[i].name)) {
+        if (checkedItems.includes(post.commitmentItems[i].name)) {
           return true;
         }
       }
@@ -66,6 +71,7 @@ export default function PostFilter({ posts, userName, userId }: PostFilterProps)
     });
   }
 
+  // Filter posts based on search query 
   const searchLower = searchQuery.toLowerCase();
   filteredPosts = filteredPosts.filter((post) => {
     if (post.accountName.toLowerCase().includes(searchLower)) {
@@ -80,10 +86,13 @@ export default function PostFilter({ posts, userName, userId }: PostFilterProps)
   });
 
   const handleCheckChange = (itemName: string) => {
-    setCheckedItems({
-      ...checkedItems,
-      [itemName]: !checkedItems[itemName],
-    });
+    if (checkedItems.includes(itemName)) {
+      // Remove from array
+      setCheckedItems(checkedItems.filter((item) => item !== itemName));
+    } else {
+      // Add to array
+      setCheckedItems([...checkedItems, itemName]);
+    }
   };
 
   return (
@@ -107,11 +116,11 @@ export default function PostFilter({ posts, userName, userId }: PostFilterProps)
             {itemTypes.map((type) => (
               <label
                 key={type}
-                className="flex items-center gap-2 cursor-pointer"
+                className="flex items-center gap-2"
               >
                 <input
                   type="checkbox"
-                  checked={checkedItems[type] || false}
+                  checked={checkedItems.includes(type)}
                   onChange={() => handleCheckChange(type)}
                   className="w-4 h-4"
                 />

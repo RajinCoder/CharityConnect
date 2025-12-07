@@ -70,7 +70,7 @@ export default async function DashboardPage() {
               />
             ) : (
               <div className="bg-white rounded-lg shadow-md p-8 text-center">
-                <p className="text-gray-500">No posts yet.</p>
+                <p className="text-gray-500">No posts yet</p>
               </div>
             )}
           </div>

@@ -1,7 +1,6 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBox,
@@ -12,6 +11,7 @@ import {
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import Link from "next/link";
 
 interface Commitment {
   userName: string;
@@ -66,16 +66,18 @@ export default function Post({
 }: PostProps) {
   const [showCommitments, setShowCommitments] = useState(false);
   const [makeCommitment, setMakeCommitment] = useState(false);
+  // State to track selected items and their amounts format: { itemId: amount }
   const [selectedItems, setSelectedItems] = useState<Record<string, number>>(
     {}
   );
+  // Prevents double submit and double delete
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  // Local state to reflect updates after commitments
   const [localCommitmentItems, setLocalCommitmentItems] =
     useState(commitmentItems);
   const [localCommitments, setLocalCommitments] = useState(commitments);
-  const router = useRouter();
-
+  
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this post?')) return;
     
@@ -98,6 +100,7 @@ export default function Post({
     }
   };
 
+  // Calculate total needed and committed items
   const totalNeeded = localCommitmentItems.reduce(
     (sum, item) => sum + item.needed,
     0
@@ -128,14 +131,18 @@ export default function Post({
     return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
   };
 
+  // Handle submitting a new commitment
   const handleSubmitCommitment = async () => {
     setIsSubmitting(true);
 
+    // Prepare commitment data for submission, filter out zero amounts
+    // Convert to array of { itemId, amount } 
     const commitmentData = Object.entries(selectedItems)
       .filter(([, amount]) => amount > 0)
       .map(([itemId, amount]) => ({ itemId, amount }));
 
     try {
+      // Send to API
       const response = await fetch("/api/commitments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -149,6 +156,7 @@ export default function Post({
 
       if (response.ok) {
         const data = await response.json();
+        // Change the local commitment items and commitments to reflect new state
         setLocalCommitmentItems(
           data.commitmentItems.map(
             (item: {
@@ -168,6 +176,7 @@ export default function Post({
             })
           )
         );
+        // Set local commitments to show the new commitment
         setLocalCommitments(data.commitments);
         setMakeCommitment(false);
         setSelectedItems({});
@@ -206,12 +215,13 @@ export default function Post({
                 className="text-red-500 hover:text-red-700 px-2 py-1 text-sm font-medium disabled:opacity-50"
                 title="Delete post"
               >
-                {isDeleting ? 'Deleting...' : 'Delete'}
+                {isDeleting ? 'Deleting' : 'Delete'}
               </button>
             )}
-            {localCommitmentItems.slice(0, 3).map((item, index) => (
+            {/* SHow up to 3 icons for the post, mapping using the icon.id. Default is a box*/}
+            {localCommitmentItems.slice(0, 3).map((item) => (
               <div
-                key={item.id || index}
+                key={item.id}
                 className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0"
                 title={item.name}
               >
@@ -221,11 +231,6 @@ export default function Post({
                 />
               </div>
             ))}
-            {localCommitmentItems.length > 3 && (
-              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                <span className="text-xs font-semibold text-gray-600">+{localCommitmentItems.length - 3}</span>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -282,8 +287,8 @@ export default function Post({
               </div>
 
               <div className="flex gap-4 mt-4 justify-center">
-                {localCommitmentItems.map((item, index) => (
-                  <div key={item.id || index} className="text-center">
+                {localCommitmentItems.map((item) => (
+                  <div key={item.id} className="text-center">
                     <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow mb-1">
                       <FontAwesomeIcon
                         icon={iconMap[item.icon] || faBox}
@@ -303,12 +308,14 @@ export default function Post({
               <h3 className="font-semibold mb-3 text-gray-700">
                 Recent Commitments
               </h3>
+              {/* List of commitments */}
               {localCommitments.length > 0 ? (
                 localCommitments.map((commitment, index) => (
                   <div
                     key={index}
                     className="flex items-center gap-3 py-2 border-b last:border-b-0"
                   >
+                    {/* Committer profile circle with link to profile */}
                     <a
                       href={`Account/Profile/${encodeURIComponent(commitment.commiterId)}`}
                       className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm font-bold text-gray-600 hover:bg-gray-300"
@@ -331,30 +338,36 @@ export default function Post({
                 ))
               ) : (
                 <p className="text-gray-400 text-sm text-center py-4">
-                  No commitments yet. Be the first!
+                  No commitments yet.
                 </p>
               )}
             </div>
-
+            {/* Make a commitment and make sure the user is logged in to make a commitment */}
             <div className="p-4 border-t">
-              <button
-                className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold"
-                onClick={() => {
-                  if (!userName) {
-                    router.push("/Account/Login");
-                    return;
-                  }
-                  setShowCommitments(false);
-                  setMakeCommitment(true);
-                }}
-              >
-                Make a Commitment
-              </button>
+              {!userName ? (
+                <Link
+                  href="/Account/Login"
+                  className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold block text-center"
+                >
+                  Login to Make a Commitment
+                </Link>
+              ) : (
+                <button
+                  className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold"
+                  onClick={() => {
+                    setShowCommitments(false);
+                    setMakeCommitment(true);
+                  }}
+                >
+                  Make a Commitment
+                </button>
+              )}
             </div>
           </div>
         </div>
       )}
 
+      {/* Make Commitment Modal */}
       {makeCommitment && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg max-w-md w-full mx-4 max-h-[80vh] overflow-hidden flex flex-col">
@@ -378,13 +391,13 @@ export default function Post({
                 Select items you want to commit to {accountName}:
               </p>
 
-              {localCommitmentItems.map((item, index) => {
+              {localCommitmentItems.map((item) => {
                 const remaining = item.needed - item.committed;
                 const currentAmount = selectedItems[item.id] || 0;
 
                 return (
                   <div
-                    key={item.id || index}
+                    key={item.id}
                     className="flex items-center gap-4 py-4 border-b last:border-b-0"
                   >
                     <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
@@ -401,6 +414,7 @@ export default function Post({
                       </p>
                     </div>
 
+                    {/* Quantity selector using plus/minus */}
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => {
@@ -457,6 +471,7 @@ export default function Post({
                   )}
                 </span>
               </div>
+              {/* Disable confirm button if no items selected or submitting */}
               <button
                 className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed"
                 disabled={

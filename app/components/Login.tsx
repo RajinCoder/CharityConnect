@@ -1,11 +1,10 @@
 "use client";
 
-import { FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
 import Link from "next/link";
 
 export default function LoginModal() {
-  const router = useRouter();
+  const [loginSuccess, setLoginSuccess] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -21,10 +20,25 @@ export default function LoginModal() {
     });
 
     if (response.ok) {
-      router.push("/Account/Profile");
-      router.refresh();
+      setLoginSuccess(true);
     }
   }
+
+  if (loginSuccess) {
+    return (
+      <div className="flex flex-col items-center justify-center border-gray-400 border shadow-lg px-6 py-10 gap-6 rounded-xl w-1/3">
+        <h2 className="text-2xl font-bold text-green-600">Login Successful!</h2>
+        <p className="text-gray-700">Welcome back!</p>
+        <Link 
+          href="/Account/Profile" 
+          className="btn"
+        >
+          Go to Profile
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <form
       onSubmit={handleSubmit}

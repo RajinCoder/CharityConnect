@@ -1,3 +1,5 @@
+import CharityMapSearch from "@/app/components/CharityMapSearch";
+
 export default function SearchPage() {
-    return <h1>Search Page</h1>;
+    return <CharityMapSearch />;
 }
