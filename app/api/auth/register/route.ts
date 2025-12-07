@@ -29,7 +29,12 @@ export async function POST(request: Request) {
 
         await newUser.save();
 
-        const jwt = await new SignJWT({ sub: newUser._id.toString(), email: newUser.email, name: newUser.name })
+        const jwt = await new SignJWT({ 
+            sub: newUser._id.toString(), 
+            email: newUser.email, 
+            name: newUser.name,
+            userType: newUser.userType 
+        })
             .setProtectedHeader({ alg: "HS256", typ: "JWT" })
             .setIssuedAt()
             .setExpirationTime("2h")
