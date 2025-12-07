@@ -8,7 +8,7 @@ const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function POST(request: Request) {
     try {
-        const { name, email, password } = await request.json();
+        const { name, email, password, userType, address } = await request.json();
 
         await dbConnect();
 
@@ -23,10 +23,11 @@ export async function POST(request: Request) {
             name,
             email,
             password: hashedPassword,
+            userType: userType || "user",
+            address: address || undefined,
         });
 
         await newUser.save();
-        console.log("New user registered:", newUser);
 
         const jwt = await new SignJWT({ sub: newUser._id.toString(), email: newUser.email, name: newUser.name })
             .setProtectedHeader({ alg: "HS256", typ: "JWT" })
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
         return new Response(JSON.stringify({ success: true }), {
             status: 201,
             headers: {
-                "Set-Cookie": `token=${jwt}; HttpOnly; Path=/; Max-Age=7200; SameSite=Strict; Secure`,
+                "Set-Cookie": `token=${jwt}; HttpOnly; Path=/; Max-Age=7200;`,
             },
         });
     } catch (error) {

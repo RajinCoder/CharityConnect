@@ -5,6 +5,18 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   userType: { type: String, enum: ["user", "charity"], default: "user" },
+  address: {
+    street: { type: String },
+    city: { type: String },
+    state: { type: String },
+    zipCode: { type: String },
+    formattedAddress: { type: String },
+    placeId: { type: String },
+    coordinates: {
+      lat: { type: Number },
+      lng: { type: Number },
+    },
+  },
   createdAt: { type: Date, default: Date.now },
 });
 
