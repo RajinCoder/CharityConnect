@@ -52,7 +52,7 @@ export default function UserProfileClient({
         window.location.reload();
       } else {
         const error = await response.json();
-        alert(error.error || "Failed to update profile.");
+        alert("Failed to update profile.");
       }
     } catch (error) {
       console.error("Update error:", error);
