@@ -218,19 +218,21 @@ export default function Post({
                 {isDeleting ? 'Deleting' : 'Delete'}
               </button>
             )}
-            {/* SHow up to 3 icons for the post, mapping using the icon.id. Default is a box*/}
-            {localCommitmentItems.slice(0, 3).map((item) => (
-              <div
-                key={item.id}
-                className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0"
-                title={item.name}
-              >
-                <FontAwesomeIcon
-                  icon={iconMap[item.icon] || faBox}
-                  className="text-green-500 text-med"
-                />
-              </div>
-            ))}
+            {/* Show up to 3 icons for the post, mapping using the icon.id. Default is a box*/}
+            <>
+              {localCommitmentItems.slice(0, 3).map((item) => (
+                <div
+                  key={item.id}
+                  className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0"
+                  title={item.name}
+                >
+                  <FontAwesomeIcon
+                    icon={iconMap[item.icon] || faBox}
+                    className="text-green-500 text-med"
+                  />
+                </div>
+              ))}
+            </>
           </div>
         </div>
       </div>
@@ -391,13 +393,13 @@ export default function Post({
                 Select items you want to commit to {accountName}:
               </p>
 
-              {localCommitmentItems.map((item) => {
+              {localCommitmentItems.map((item, index) => {
                 const remaining = item.needed - item.committed;
                 const currentAmount = selectedItems[item.id] || 0;
 
                 return (
                   <div
-                    key={item.id}
+                    key={index}
                     className="flex items-center gap-4 py-4 border-b last:border-b-0"
                   >
                     <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">

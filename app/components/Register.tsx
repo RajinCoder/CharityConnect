@@ -174,14 +174,14 @@ export default function RegisterModal() {
             <input
               className="input_box"
               type="text"
-              placeholder="Search for your address..."
+              placeholder="Search for your address"
             />
           </Autocomplete>
         ) : (
           <input
             className="input_box"
             type="text"
-            placeholder="Loading Google Maps..."
+            placeholder="Loading Google Maps"
             disabled
             readOnly
           />
