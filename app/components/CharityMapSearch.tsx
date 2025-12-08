@@ -163,7 +163,7 @@ export default function CharityMapSearch() {
               );
             })}
 
-            {/* InfoWindow for selected charity */}
+            {/* InfoWindow for selected charity on the map*/}
             {selectedCharity && selectedCharity.address?.coordinates && (
               <InfoWindow
                 position={{
