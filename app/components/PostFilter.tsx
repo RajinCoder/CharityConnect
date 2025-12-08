@@ -45,7 +45,7 @@ export default function PostFilter({
   const [checkedItems, setCheckedItems] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  // Loop through all posts, then loop through their needed items
+  // Loop through all posts, then loop through their needed items to add unique item types
   const itemTypeSet = new Set<string>();
   posts.map((post) => {
     post.commitmentItems.map((item) => {
