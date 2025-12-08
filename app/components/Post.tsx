@@ -36,6 +36,7 @@ interface PostProps {
   committerUserId?: string;
   canDelete?: boolean;
   onDelete?: (postId: string) => void;
+  allowCommitments?: boolean;
 }
 
 const iconMap: Record<string, IconDefinition> = {
@@ -57,6 +58,7 @@ export default function Post({
   committerUserId,
   canDelete = false,
   onDelete,
+  allowCommitments = true,
 }: PostProps) {
   const [showCommitments, setShowCommitments] = useState(false);
   const [makeCommitment, setMakeCommitment] = useState(false);
@@ -181,6 +183,7 @@ export default function Post({
             setShowCommitments(false);
             setMakeCommitment(true);
           }}
+          allowCommitments={allowCommitments}
         />
       )}
 

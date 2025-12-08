@@ -142,6 +142,7 @@ export default function UserProfileClient({
                 userName={user?.name}
                 canDelete={isOwner}
                 onDelete={handleDeletePost}
+                allowCommitments={false}
               />
             ))}
           </div>

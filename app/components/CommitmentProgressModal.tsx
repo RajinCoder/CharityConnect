@@ -27,6 +27,7 @@ interface CommitmentProgressModalProps {
   userName?: string;
   onClose: () => void;
   onMakeCommitment: () => void;
+  allowCommitments?: boolean;
 }
 
 const iconMap: Record<string, IconDefinition> = {
@@ -38,6 +39,7 @@ const iconMap: Record<string, IconDefinition> = {
 const formatTimestamp = (iso?: string) => {
   if (!iso) return "";
   const t = Date.parse(iso);
+  if (Number.isNaN(t)) return iso;
   const diff = Date.now() - t;
   const minute = 60 * 1000;
   const hour = 60 * minute;
@@ -61,6 +63,7 @@ export default function CommitmentProgressModal({
   userName,
   onClose,
   onMakeCommitment,
+  allowCommitments = true,
 }: CommitmentProgressModalProps) {
   const totalNeeded = commitmentItems.reduce((sum, item) => sum + item.needed, 0);
   const totalCommitted = commitmentItems.reduce((sum, item) => sum + item.committed, 0);
@@ -120,7 +123,7 @@ export default function CommitmentProgressModal({
           {commitments.length > 0 ? (
             commitments.map((commitment, index) => (
               <div
-                key={index}
+                key={`${index}`}
                 className="flex items-center gap-3 py-2 border-b last:border-b-0"
               >
                 <a
@@ -155,23 +158,25 @@ export default function CommitmentProgressModal({
             </p>
           )}
         </div>
-        <div className="p-4 border-t">
-          {!userName ? (
-            <Link
-              href="/Account/Login"
-              className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold block text-center"
-            >
-              Login to Make a Commitment
-            </Link>
-          ) : (
-            <button
-              className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold"
-              onClick={onMakeCommitment}
-            >
-              Make a Commitment
-            </button>
-          )}
-        </div>
+        {allowCommitments && (
+          <div className="p-4 border-t">
+            {!userName ? (
+              <Link
+                href="/Account/Login"
+                className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold block text-center"
+              >
+                Login to Make a Commitment
+              </Link>
+            ) : (
+              <button
+                className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold"
+                onClick={onMakeCommitment}
+              >
+                Make a Commitment
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
