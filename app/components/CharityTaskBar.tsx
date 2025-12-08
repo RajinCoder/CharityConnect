@@ -2,7 +2,7 @@
 
 export default function CharityTaskBar() {
   return (
-    <div className="w-64 flex-shrink-0">
+    <div className="w-64 flex-shrink-0 pl-6">
       <div className="sticky top-20 flex flex-col gap-4">
         <button
           aria-label="Create new post"
@@ -26,16 +26,6 @@ export default function CharityTaskBar() {
           </span>
           <span className="ml-1 text-gray-700 font-medium">Create New Post</span>
         </button>
-
-        <div className="bg-white rounded-lg shadow-md p-4">
-          <h2 className="text-lg font-semibold mb-3 text-gray-800">Charity Tasks</h2>
-          <ul className="list-disc list-inside text-gray-700 space-y-1">
-            <li>Review new commitments</li>
-            <li>Update needed items</li>
-            <li>Engage with followers</li>
-            <li>Plan upcoming campaigns</li>
-          </ul>
-        </div>
       </div>
     </div>
   );
