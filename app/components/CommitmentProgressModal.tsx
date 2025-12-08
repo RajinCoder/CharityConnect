@@ -140,7 +140,7 @@ export default function CommitmentProgressModal({
                       href={`/Account/Profile/${encodeURIComponent(
                         commitment.commiterId
                       )}`}
-                      className="font-semibold hover:text-green-600 hover:underline transition-colors"
+                      className="font-semibold hover:text-green-600 hover:underline"
                     >
                       {commitment.userName}
                     </a>{" "}

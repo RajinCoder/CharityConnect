@@ -45,6 +45,7 @@ export default function CharityMapSearch() {
   const [charities, setCharities] = useState<Charity[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [mapCenter, setMapCenter] = useState(defaultCenter);
+  
   const [mapZoom, setMapZoom] = useState(4);
   const [selectedCharity, setSelectedCharity] = useState<Charity | null>(null);
 
@@ -72,7 +73,7 @@ export default function CharityMapSearch() {
       const response = await fetch(`/api/charities/search?zipCode=${zipCode}`);
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json(); 
         setCharities(data.charities);
 
         // Center map on first charity
@@ -162,6 +163,7 @@ export default function CharityMapSearch() {
               );
             })}
 
+            {/* InfoWindow for selected charity */}
             {selectedCharity && selectedCharity.address?.coordinates && (
               <InfoWindow
                 position={{
