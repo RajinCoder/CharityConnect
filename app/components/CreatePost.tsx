@@ -81,14 +81,15 @@ export default function CreatePost({
         return;
       }
 
-      const validateImageUrl = (url: string, timeout = 5000) =>
+      const validateImageUrl = (url: string) =>
         new Promise<boolean>((resolve) => {
           if (!url) return resolve(false);
           const img = new Image();
           let timer = window.setTimeout(() => {
             img.src = "";
             resolve(false);
-          }, timeout);
+            // Timeout after 5 seconds
+          }, 5000);
           img.onload = () => {
             clearTimeout(timer);
             resolve(true);
