@@ -91,7 +91,7 @@ export default function CharityMapSearch() {
   if (!isLoaded) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p className="text-gray-500">Loading map...</p>
+        <p className="text-gray-500">Loading map</p>
       </div>
     );
   }

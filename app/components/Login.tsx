@@ -50,6 +50,7 @@ export default function LoginModal() {
         <Link 
           href="/Account/Profile" 
           className="btn"
+          onClick={() => router.refresh()}
         >
           Go to Profile
         </Link>

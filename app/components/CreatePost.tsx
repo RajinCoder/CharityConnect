@@ -128,7 +128,7 @@ export default function CreatePost({
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-6">
+    <div className="flex flex-col md:flex-row gap-6 p-6 max-w-7xl mx-auto">
       <form onSubmit={submit} className="space-y-4 flex-1">
       <label className="block">
         <span className="text-sm font-medium">Image URL</span>
