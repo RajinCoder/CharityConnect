@@ -26,6 +26,7 @@ export async function POST(request: Request) {
       if (typeof entry === "string") {
         const name = entry;
         return {
+          //Replace spaces with dashes and lowercase for itemId
           itemId: name.toLowerCase().replace(/\s+/g, "-"),
           name,
           needed: 1,
@@ -37,6 +38,7 @@ export async function POST(request: Request) {
       const name = entry.name || String(entry);
       const needed = Number(entry.needed) || 1;
       return {
+        //Replace spaces with dashes and lowercase for itemId
         itemId: name.toLowerCase().replace(/\s+/g, "-"),
         name,
         needed,
@@ -48,8 +50,8 @@ export async function POST(request: Request) {
     const postPayload = {
       imageUrl: body.imageUrl || "",
       caption: body.caption || "",
-      accountName: user?.name || body.accountName || "",
-      userId: user?.id || body.userId || "",
+      accountName: user?.name || "",
+      userId: user?.id || "",
       commitmentItems,
       commitments: body.commitments || [],
       date: body.date || new Date().toISOString(),

@@ -103,7 +103,7 @@ export default function CreatePost({
 
       const ok = await validateImageUrl(imageUrl);
       if (!ok) {
-        setImageError("Image URL is not a valid or reachable image.");
+        setImageError("Image URL is not a valid image.");
         setLoading(false);
         return;
       }
@@ -302,7 +302,7 @@ export default function CreatePost({
         <button
           type="submit"
           disabled={loading}
-          className="px-4 py-2 bg-green-600 text-white rounded"
+          className="px-4 py-2 bg-blue-600 text-white rounded"
         >
           {loading ? "Posting..." : "Post"}
         </button>
