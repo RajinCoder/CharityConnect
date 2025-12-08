@@ -13,7 +13,7 @@ export default function Owners() {
         href="https://github.com/RajinCoder/CharityConnect"
       >
         <Image
-          src={`/Images/github.svg`}
+          src={`/images/github.svg`}
           alt="github image"
           width={50}
           height={50}
