@@ -11,10 +11,12 @@ export default function RegisterModal() {
   const router = useRouter();
   const [isCharity, setIsCharity] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+
   const [street, setStreet] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [zipCode, setZipCode] = useState("");
+  
   const [formattedAddress, setFormattedAddress] = useState("");
   const [placeId, setPlaceId] = useState("");
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
@@ -23,6 +25,7 @@ export default function RegisterModal() {
   const { isLoaded } = useLoadScript({
     // Information for loading Google Maps autocomplete: https://developers.google.com/maps/documentation/javascript/legacy/place-autocomplete
     // https://medium.com/weekly-webtips/working-with-google-api-38d57d6a23e4
+    // https://developers.google.com/maps/documentation/places/web-service/overview
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
     libraries,
   });
@@ -97,6 +100,7 @@ export default function RegisterModal() {
       coordinates,
     } : undefined;
 
+    // API call to register user
     const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

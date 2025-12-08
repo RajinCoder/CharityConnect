@@ -2,16 +2,10 @@
 import Image from "next/image";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faBox,
-  faUtensils,
-  faTshirt,
-  faXmark,
-  faMinus,
-  faPlus,
-} from "@fortawesome/free-solid-svg-icons";
+import { faBox, faUtensils, faTshirt } from "@fortawesome/free-solid-svg-icons";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
-import Link from "next/link";
+import CommitmentProgressModal from "./CommitmentProgressModal";
+import MakeCommitmentModal from "./MakeCommitmentModal";
 
 interface Commitment {
   userName: string;
@@ -66,14 +60,7 @@ export default function Post({
 }: PostProps) {
   const [showCommitments, setShowCommitments] = useState(false);
   const [makeCommitment, setMakeCommitment] = useState(false);
-  // State to track selected items and their amounts format: { itemId: amount }
-  const [selectedItems, setSelectedItems] = useState<Record<string, number>>(
-    {}
-  );
-  // Prevents double submit and double delete
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  // Local state to reflect updates after commitments
   const [localCommitmentItems, setLocalCommitmentItems] =
     useState(commitmentItems);
   const [localCommitments, setLocalCommitments] = useState(commitments);
@@ -100,7 +87,6 @@ export default function Post({
     }
   };
 
-  // Calculate total needed and committed items
   const totalNeeded = localCommitmentItems.reduce(
     (sum, item) => sum + item.needed,
     0
@@ -111,84 +97,12 @@ export default function Post({
   );
   const progressPercent = Math.round((totalCommitted / totalNeeded) * 100);
 
-  const formatTimestamp = (iso?: string) => {
-    if (!iso) return "";
-    const t = Date.parse(iso);
-    if (Number.isNaN(t)) return iso;
-    const diff = Date.now() - t;
-    const minute = 60 * 1000;
-    const hour = 60 * minute;
-    const day = 24 * hour;
-    if (diff < hour) {
-      const mins = Math.max(1, Math.floor(diff / minute));
-      return `${mins}m ago`;
-    }
-    if (diff < day) {
-      const hrs = Math.max(1, Math.floor(diff / hour));
-      return `${hrs}h ago`;
-    }
-    const d = new Date(t);
-    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-  };
-
-  // Handle submitting a new commitment
-  const handleSubmitCommitment = async () => {
-    setIsSubmitting(true);
-
-    // Prepare commitment data for submission, filter out zero amounts
-    // Convert to array of { itemId, amount }
-    const commitmentData = Object.entries(selectedItems)
-      .filter(([, amount]) => amount > 0)
-      .map(([itemId, amount]) => ({ itemId, amount }));
-
-    try {
-      // Send to API
-      const response = await fetch("/api/commitments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          postId,
-          userName,
-          userId: committerUserId,
-          commitments: commitmentData,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        // Change the local commitment items and commitments to reflect new state
-        setLocalCommitmentItems(
-          data.commitmentItems.map(
-            (item: {
-              itemId: string;
-              name: string;
-              userId: string;
-              needed: number;
-              committed: number;
-              icon: string;
-            }) => ({
-              id: item.itemId,
-              name: item.name,
-              userId: item.userId,
-              needed: item.needed,
-              committed: item.committed,
-              icon: item.icon,
-            })
-          )
-        );
-        // Set local commitments to show the new commitment
-        setLocalCommitments(data.commitments);
-        setMakeCommitment(false);
-        setSelectedItems({});
-      } else {
-        const error = await response.json();
-        alert(error.error || "Failed to submit commitment");
-      }
-    } catch (error) {
-      alert("Failed to submit commitment");
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleCommitmentSuccess = (
+    updatedCommitmentItems: CommitmentItem[],
+    updatedCommitments: Commitment[]
+  ) => {
+    setLocalCommitmentItems(updatedCommitmentItems);
+    setLocalCommitments(updatedCommitments);
   };
 
   return (
@@ -203,7 +117,7 @@ export default function Post({
               {accountName}
             </a>
             {date && (
-              <p className="text-xs text-gray-500">{formatTimestamp(date)}</p>
+              <p className="text-xs text-gray-500">{new Date(date).toLocaleDateString()}</p>
             )}
           </div>
 
@@ -218,9 +132,7 @@ export default function Post({
                 {isDeleting ? "Deleting" : "Delete"}
               </button>
             )}
-            {/* Show up to 3 icons for the post, mapping using the icon.id. Default is a box*/}
-            <>
-              {localCommitmentItems.slice(0, 3).map((item, index) => (
+            {localCommitmentItems.slice(0, 3).map((item, index) => (
                 <div
                   key={index}
                   className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0"
@@ -232,7 +144,6 @@ export default function Post({
                   />
                 </div>
               ))}
-            </>
           </div>
         </div>
       </div>
@@ -260,241 +171,29 @@ export default function Post({
       </div>
 
       {showCommitments && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg max-w-md w-full mx-4 max-h-[80vh] overflow-hidden flex flex-col">
-            <div className="p-4 border-b flex justify-between items-center">
-              <h2 className="text-xl font-bold">Help {accountName}</h2>
-              <button onClick={() => setShowCommitments(false)}>
-                <FontAwesomeIcon
-                  icon={faXmark}
-                  className="text-gray-500 text-xl"
-                />
-              </button>
-            </div>
-
-            <div className="p-4 bg-gray-50">
-              <div className="mb-2 flex justify-between text-sm">
-                <span className="font-semibold">
-                  {totalCommitted} of {totalNeeded} items committed
-                </span>
-                <span className="text-green-600 font-bold">
-                  {progressPercent}%
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div
-                  className="bg-green-500 h-3 rounded-full transition-all"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-
-              <div className="flex gap-4 mt-4 justify-center">
-                {localCommitmentItems.map((item) => (
-                  <div key={item.id} className="text-center">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow mb-1">
-                      <FontAwesomeIcon
-                        icon={iconMap[item.icon] || faBox}
-                        className="text-green-500 text-xl"
-                      />
-                    </div>
-                    <p className="text-xs font-medium">{item.name}</p>
-                    <p className="text-xs text-gray-500">
-                      {item.committed}/{item.needed}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4">
-              <h3 className="font-semibold mb-3 text-gray-700">
-                Recent Commitments
-              </h3>
-              {/* List of commitments */}
-              {localCommitments.length > 0 ? (
-                localCommitments.map((commitment, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-3 py-2 border-b last:border-b-0"
-                  >
-                    {/* Committer profile circle with link to profile */}
-                    <a
-                      href={`Account/Profile/${encodeURIComponent(
-                        commitment.commiterId
-                      )}`}
-                      className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm font-bold text-gray-600 hover:bg-gray-300"
-                    >
-                      {commitment.userName.charAt(0).toUpperCase()}
-                    </a>
-                    <div className="flex-1">
-                      <p className="text-sm">
-                        <a
-                          href={`/Account/Profile/${encodeURIComponent(
-                            commitment.commiterId
-                          )}`}
-                          className="font-semibold hover:text-green-600 hover:underline transition-colors"
-                        >
-                          {commitment.userName}
-                        </a>{" "}
-                        committed {commitment.amount} {commitment.itemName}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {formatTimestamp(commitment.date)}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-400 text-sm text-center py-4">
-                  No commitments yet.
-                </p>
-              )}
-            </div>
-            {/* Make a commitment and make sure the user is logged in to make a commitment */}
-            <div className="p-4 border-t">
-              {!userName ? (
-                <Link
-                  href="/Account/Login"
-                  className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold block text-center"
-                >
-                  Login to Make a Commitment
-                </Link>
-              ) : (
-                <button
-                  className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold"
-                  onClick={() => {
-                    setShowCommitments(false);
-                    setMakeCommitment(true);
-                  }}
-                >
-                  Make a Commitment
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
+        <CommitmentProgressModal
+          accountName={accountName}
+          commitmentItems={localCommitmentItems}
+          commitments={localCommitments}
+          userName={userName}
+          onClose={() => setShowCommitments(false)}
+          onMakeCommitment={() => {
+            setShowCommitments(false);
+            setMakeCommitment(true);
+          }}
+        />
       )}
 
-      {/* Make Commitment Modal */}
       {makeCommitment && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg max-w-md w-full mx-4 max-h-[80vh] overflow-hidden flex flex-col">
-            <div className="p-4 border-b flex justify-between items-center">
-              <h2 className="text-xl font-bold">Make a Commitment</h2>
-              <button
-                onClick={() => {
-                  setMakeCommitment(false);
-                  setSelectedItems({});
-                }}
-              >
-                <FontAwesomeIcon
-                  icon={faXmark}
-                  className="text-gray-500 text-xl"
-                />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4">
-              <p className="text-gray-600 mb-4">
-                Select items you want to commit to {accountName}:
-              </p>
-
-              {localCommitmentItems.map((item, index) => {
-                const remaining = item.needed - item.committed;
-                const currentAmount = selectedItems[item.id] || 0;
-
-                return (
-                  <div
-                    key={index}
-                    className="flex items-center gap-4 py-4 border-b last:border-b-0"
-                  >
-                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                      <FontAwesomeIcon
-                        icon={iconMap[item.icon] || faBox}
-                        className="text-green-500 text-xl"
-                      />
-                    </div>
-
-                    <div className="flex-1">
-                      <p className="font-semibold">{item.name}</p>
-                      <p className="text-sm text-gray-500">
-                        {remaining} still needed
-                      </p>
-                    </div>
-
-                    {/* Quantity selector using plus/minus */}
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => {
-                          if (currentAmount > 0) {
-                            setSelectedItems({
-                              ...selectedItems,
-                              [item.id]: currentAmount - 1,
-                            });
-                          }
-                        }}
-                        className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300"
-                        disabled={currentAmount === 0}
-                      >
-                        <FontAwesomeIcon
-                          icon={faMinus}
-                          className="text-gray-600 text-sm"
-                        />
-                      </button>
-
-                      <span className="w-8 text-center font-semibold">
-                        {currentAmount}
-                      </span>
-
-                      <button
-                        onClick={() => {
-                          if (currentAmount < remaining) {
-                            setSelectedItems({
-                              ...selectedItems,
-                              [item.id]: currentAmount + 1,
-                            });
-                          }
-                        }}
-                        className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center hover:bg-green-600"
-                        disabled={currentAmount >= remaining}
-                      >
-                        <FontAwesomeIcon
-                          icon={faPlus}
-                          className="text-white text-sm"
-                        />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="p-4 border-t bg-gray-50">
-              <div className="flex justify-between mb-3">
-                <span className="text-gray-600">Total items:</span>
-                <span className="font-bold">
-                  {Object.values(selectedItems).reduce(
-                    (sum, val) => sum + val,
-                    0
-                  )}
-                </span>
-              </div>
-              {/* Disable confirm button if no items selected or submitting */}
-              <button
-                className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed"
-                disabled={
-                  Object.values(selectedItems).reduce(
-                    (sum, val) => sum + val,
-                    0
-                  ) === 0 || isSubmitting
-                }
-                onClick={handleSubmitCommitment}
-              >
-                {isSubmitting ? "Submitting" : "Confirm Commitment"}
-              </button>
-            </div>
-          </div>
-        </div>
+        <MakeCommitmentModal
+          accountName={accountName}
+          commitmentItems={localCommitmentItems}
+          postId={postId}
+          userName={userName}
+          committerUserId={committerUserId}
+          onClose={() => setMakeCommitment(false)}
+          onSubmitSuccess={handleCommitmentSuccess}
+        />
       )}
     </div>
   );
