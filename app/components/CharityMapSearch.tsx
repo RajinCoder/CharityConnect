@@ -1,9 +1,17 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { GoogleMap, useLoadScript, Marker, InfoWindow } from "@react-google-maps/api";
+import {
+  GoogleMap,
+  useLoadScript,
+  Marker,
+  InfoWindow,
+} from "@react-google-maps/api";
 
-const libraries: ("places")[] = ["places"];
+const libraries: "places"[] = ["places"];
+
+// Information for loading Google Maps API: https://developers.google.com/maps/documentation/javascript
+// https://medium.com/weekly-webtips/working-with-google-api-38d57d6a23e4
 
 const mapContainerStyle = {
   width: "100%",
@@ -11,8 +19,8 @@ const mapContainerStyle = {
 };
 
 const defaultCenter = {
-  lat: 39.8283,
-  lng: -98.5795,
+  lat: 39.8,
+  lng: -98.5,
 };
 
 interface Charity {
@@ -49,7 +57,6 @@ export default function CharityMapSearch() {
     libraries,
   });
 
-  // Callback when map loads
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
   }, []);
@@ -68,8 +75,11 @@ export default function CharityMapSearch() {
         const data = await response.json();
         setCharities(data.charities);
 
-        // Center map on first charity if results exist
-        if (data.charities.length > 0 && data.charities[0].address?.coordinates) {
+        // Center map on first charity
+        if (
+          data.charities.length > 0 &&
+          data.charities[0].address?.coordinates
+        ) {
           setMapCenter({
             lat: data.charities[0].address.coordinates.lat,
             lng: data.charities[0].address.coordinates.lng,
@@ -80,7 +90,6 @@ export default function CharityMapSearch() {
         alert("Failed to search charities");
       }
     } catch (error) {
-      console.error("Search error:", error);
       alert("Failed to search charities");
     } finally {
       setIsSearching(false);
@@ -109,17 +118,16 @@ export default function CharityMapSearch() {
               type="text"
               value={zipCode}
               onChange={(e) => setZipCode(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSearch()}
               placeholder="Enter zip code"
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2"
               maxLength={5}
             />
             <button
               onClick={handleSearch}
               disabled={isSearching}
-              className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed font-semibold"
+              className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:cursor-not-allowed font-semibold"
             >
-              {isSearching ? "Searching..." : "Search"}
+              {isSearching ? "Searching" : "Search"}
             </button>
           </div>
 
@@ -163,8 +171,12 @@ export default function CharityMapSearch() {
                 onCloseClick={() => setSelectedCharity(null)}
               >
                 <div className="p-2">
-                  <h3 className="font-bold text-lg mb-1">{selectedCharity.name}</h3>
-                  <p className="text-sm text-gray-600 mb-1">{selectedCharity.email}</p>
+                  <h3 className="font-bold text-lg mb-1">
+                    {selectedCharity.name}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-1">
+                    {selectedCharity.email}
+                  </p>
                   <p className="text-sm text-gray-700 mb-2">
                     {selectedCharity.address.formattedAddress ||
                       `${selectedCharity.address.street}, ${selectedCharity.address.city}, ${selectedCharity.address.state} ${selectedCharity.address.zipCode}`}
@@ -205,7 +217,7 @@ export default function CharityMapSearch() {
                     href={`/Account/Profile/${charity._id}`}
                     className="text-green-600 hover:text-green-700 font-semibold text-sm"
                   >
-                    View Profile →
+                    View Profile
                   </a>
                 </div>
               ))}
@@ -216,4 +228,3 @@ export default function CharityMapSearch() {
     </div>
   );
 }
- 

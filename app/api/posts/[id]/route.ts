@@ -28,9 +28,6 @@ export async function DELETE(
       );
     }
 
-    console.log("Delete check - Post userId:", post.userId, "User id:", user.id);
-    console.log("Delete check - Post accountName:", post.accountName, "User name:", user.name);
-
     const isOwner = post.userId === user.id 
     if (!isOwner) {
       return NextResponse.json(
