@@ -77,24 +77,24 @@ export default function Post({
   const [localCommitmentItems, setLocalCommitmentItems] =
     useState(commitmentItems);
   const [localCommitments, setLocalCommitments] = useState(commitments);
-  
+
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this post?')) return;
-    
+    if (!confirm("Are you sure you want to delete this post?")) return;
+
     setIsDeleting(true);
     try {
       const response = await fetch(`/api/posts/${postId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
-      
+
       if (response.ok) {
         onDelete?.(postId);
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to delete post');
+        alert(error.error || "Failed to delete post");
       }
     } catch (error) {
-      alert('Failed to delete post');
+      alert("Failed to delete post");
     } finally {
       setIsDeleting(false);
     }
@@ -136,7 +136,7 @@ export default function Post({
     setIsSubmitting(true);
 
     // Prepare commitment data for submission, filter out zero amounts
-    // Convert to array of { itemId, amount } 
+    // Convert to array of { itemId, amount }
     const commitmentData = Object.entries(selectedItems)
       .filter(([, amount]) => amount > 0)
       .map(([itemId, amount]) => ({ itemId, amount }));
@@ -198,7 +198,7 @@ export default function Post({
           <div className="flex-1 min-w-0">
             <a
               href={`/Account/Profile/${encodeURIComponent(userId)}`}
-              className="font-semibold truncate block"  
+              className="font-semibold truncate block"
             >
               {accountName}
             </a>
@@ -215,14 +215,14 @@ export default function Post({
                 className="text-red-500 hover:text-red-700 px-2 py-1 text-sm font-medium disabled:opacity-50"
                 title="Delete post"
               >
-                {isDeleting ? 'Deleting' : 'Delete'}
+                {isDeleting ? "Deleting" : "Delete"}
               </button>
             )}
             {/* Show up to 3 icons for the post, mapping using the icon.id. Default is a box*/}
             <>
-              {localCommitmentItems.slice(0, 3).map((item) => (
+              {localCommitmentItems.slice(0, 3).map((item, index) => (
                 <div
-                  key={item.id}
+                  key={index}
                   className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0"
                   title={item.name}
                 >
@@ -319,22 +319,28 @@ export default function Post({
                   >
                     {/* Committer profile circle with link to profile */}
                     <a
-                      href={`Account/Profile/${encodeURIComponent(commitment.commiterId)}`}
+                      href={`Account/Profile/${encodeURIComponent(
+                        commitment.commiterId
+                      )}`}
                       className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm font-bold text-gray-600 hover:bg-gray-300"
                     >
                       {commitment.userName.charAt(0).toUpperCase()}
                     </a>
                     <div className="flex-1">
                       <p className="text-sm">
-                        <a 
-                          href={`/Account/Profile/${encodeURIComponent(commitment.commiterId)}`}
+                        <a
+                          href={`/Account/Profile/${encodeURIComponent(
+                            commitment.commiterId
+                          )}`}
                           className="font-semibold hover:text-green-600 hover:underline transition-colors"
                         >
                           {commitment.userName}
                         </a>{" "}
                         committed {commitment.amount} {commitment.itemName}
                       </p>
-                      <p className="text-xs text-gray-400">{formatTimestamp(commitment.date)}</p>
+                      <p className="text-xs text-gray-400">
+                        {formatTimestamp(commitment.date)}
+                      </p>
                     </div>
                   </div>
                 ))
